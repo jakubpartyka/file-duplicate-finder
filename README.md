@@ -1,2 +1,2 @@
 # file-duplicate-finder
-A simple java app to find files duplicates on your disk that helps you save disk space
+Simple Java Application that lists duplicated files and helps you optimize disk space using Apache Commons 2.6
