@@ -20,6 +20,9 @@ public class FileScanner {
 
     //directories to scan
     private List<File> directoriesToScan = new ArrayList<>();
+    
+    //output
+    private String output = "";
 
     public FileScanner(File initialDirectory, boolean recursive) {
         if(initialDirectory == null)
@@ -39,14 +42,14 @@ public class FileScanner {
 
         //test - print duplicates
         if(duplicates.isEmpty())
-            System.out.println("no duplicates");
+            appendToOutput("no duplicates");
         else
             for (List<File> duplicateList : duplicates) {
-                System.out.println("following files are duplicates:");
+                appendToOutput("following files are duplicates:");
                 for (File file : duplicateList) {
-                    System.out.println(file.getAbsolutePath());
+                    appendToOutput(file.getAbsolutePath());
                 }
-                System.out.println("\n");
+                appendToOutput("\n");
             }
     }
 
@@ -97,5 +100,13 @@ public class FileScanner {
             else if(file.isFile())
                 allFiles.add(file);
         }
+    }
+    
+    private void appendToOutput(String message){
+        output += message + "\n";
+    }
+
+    public String getOutput() {
+        return output;
     }
 }

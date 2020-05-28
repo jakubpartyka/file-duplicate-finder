@@ -1,5 +1,8 @@
 package GUI;
 
+//todo add scan time calculation
+//todo stats (number of scanned files)
+
 import FileManagement.FileScanner;
 
 import javax.swing.*;
@@ -12,8 +15,8 @@ public class MainGui implements Runnable {
     private JButton browseButton;
     private JPanel contentPanel;
     private JCheckBox recursiveCheckBox;
-    private JProgressBar progressBar;
     private JButton scanButton;
+    private JTextArea duplicateOutput;
 
     //FILES
     private File chosenDirectory;
@@ -55,6 +58,7 @@ public class MainGui implements Runnable {
         scanButton.addActionListener(e -> {
             FileScanner fileScanner = new FileScanner(chosenDirectory,recursiveCheckBox.isSelected());
             fileScanner.scan();     //todo new Thread?
+            duplicateOutput.setText(fileScanner.getOutput());
         });
     }
 
