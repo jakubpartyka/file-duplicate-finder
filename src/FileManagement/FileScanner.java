@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 
+@SuppressWarnings("ConstantConditions")
 public class FileScanner {
     private boolean recursive;
 

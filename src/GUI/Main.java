@@ -8,7 +8,7 @@ public class Main {
 	    new Main();
     }
 
-    Main(){
+    private Main(){
         SwingUtilities.invokeLater(new MainGui());
     }
 }
