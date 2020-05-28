@@ -24,9 +24,9 @@ public class FileScanner {
     //output
     private String output = "";
 
-    public FileScanner(File initialDirectory, boolean recursive) {
+    public FileScanner(File initialDirectory, boolean recursive) throws InvalidDirectoryException {
         if(initialDirectory == null)
-            return;     //todo display message
+            throw new InvalidDirectoryException();
         this.initialDirectory = initialDirectory;
         directoriesToScan.add(initialDirectory);
         this.recursive = recursive;

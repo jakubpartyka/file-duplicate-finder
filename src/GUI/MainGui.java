@@ -4,6 +4,7 @@ package GUI;
 //todo stats (number of scanned files)
 
 import FileManagement.FileScanner;
+import FileManagement.InvalidDirectoryException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,9 +57,14 @@ public class MainGui implements Runnable {
         });
 
         scanButton.addActionListener(e -> {
-            FileScanner fileScanner = new FileScanner(chosenDirectory,recursiveCheckBox.isSelected());
-            fileScanner.scan();     //todo new Thread?
-            duplicateOutput.setText(fileScanner.getOutput());
+            try {
+                FileScanner fileScanner = new FileScanner(chosenDirectory, recursiveCheckBox.isSelected());
+                fileScanner.scan();     //todo new Thread?
+                duplicateOutput.setText(fileScanner.getOutput());
+            }
+            catch (InvalidDirectoryException exception){
+                JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
+            }
         });
     }
 
