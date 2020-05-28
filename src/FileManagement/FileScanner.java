@@ -8,8 +8,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 public class FileScanner {
-    //INITIAL VALUES PASSED FROM CONSTRUCTOR
-    private File initialDirectory;
     private boolean recursive;
 
     //all matching files
@@ -24,11 +22,12 @@ public class FileScanner {
     //output
     private String output = "";
 
-    public FileScanner(File initialDirectory, boolean recursive) throws InvalidDirectoryException {
-        if(initialDirectory == null)
+    public FileScanner(List<File> initialDirectories, boolean recursive) throws InvalidDirectoryException {
+        if(initialDirectories.contains(null))
             throw new InvalidDirectoryException();
-        this.initialDirectory = initialDirectory;
-        directoriesToScan.add(initialDirectory);
+        else if(initialDirectories.isEmpty())
+            throw new InvalidDirectoryException("empty");
+        directoriesToScan.addAll(initialDirectories);
         this.recursive = recursive;
     }
 

@@ -9,6 +9,8 @@ import FileManagement.InvalidDirectoryException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainGui implements Runnable {
     //COMPONENTS
@@ -20,14 +22,13 @@ public class MainGui implements Runnable {
     private JTextArea duplicateOutput;
 
     //FILES
-    private File chosenDirectory;
-
-    //FRAME
-    private JFrame frame;
+    private File home;
+    private List<File> chosenDirectories = new ArrayList<>();
 
     MainGui(){
-        chosenDirectory = new File(System.getProperty("user.home"));
-        directory.setText(chosenDirectory.getAbsolutePath());
+        home = new File(System.getProperty("user.home"));
+        chosenDirectories.add(home);
+        directory.setText(home.getAbsolutePath());
     }
 
     @Override
@@ -37,7 +38,8 @@ public class MainGui implements Runnable {
     }
 
     private void initFrame() {
-        frame = new JFrame();
+        //FRAME
+        JFrame frame = new JFrame();
         frame.setSize(600,600);
         frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
@@ -50,15 +52,16 @@ public class MainGui implements Runnable {
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            fileChooser.setCurrentDirectory(chosenDirectory);
+            fileChooser.setCurrentDirectory(home);
+            fileChooser.setMultiSelectionEnabled(true);
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)
-                setChosenDirectory(fileChooser.getSelectedFile());
+                setChosenDirectory(fileChooser.getSelectedFiles());
         });
 
         scanButton.addActionListener(e -> {
             try {
-                FileScanner fileScanner = new FileScanner(chosenDirectory, recursiveCheckBox.isSelected());
+                FileScanner fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
                 fileScanner.scan();     //todo new Thread?
                 duplicateOutput.setText(fileScanner.getOutput());
             }
@@ -68,8 +71,10 @@ public class MainGui implements Runnable {
         });
     }
 
-    private void setChosenDirectory(File chosenDirectory) {
-        this.chosenDirectory = chosenDirectory;
-        directory.setText(chosenDirectory.getAbsolutePath());
+    private void setChosenDirectory(File[] chosenDirectories) {
+        if(chosenDirectories.length > 1)
+            directory.setText("multiple directories selected");
+        else
+            directory.setText(chosenDirectories[0].getAbsolutePath());
     }
 }
