@@ -1,3 +1,7 @@
+package GUI;
+
+import FileManagement.FileScanner;
+
 import javax.swing.*;
 import javax.swing.plaf.FileChooserUI;
 import java.awt.*;
@@ -9,6 +13,8 @@ public class MainGui implements Runnable {
     private JButton browseButton;
     private JPanel contentPanel;
     private JCheckBox recursiveCheckBox;
+    private JProgressBar progressBar1;
+    private JButton scanButton;
 
     //FILES
     private File chosenDirectory;
@@ -45,6 +51,11 @@ public class MainGui implements Runnable {
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)
                 setChosenDirectory(fileChooser.getSelectedFile());
+        });
+
+        scanButton.addActionListener(e -> {
+            FileScanner fileScanner = new FileScanner(chosenDirectory,recursiveCheckBox.isSelected());
+            fileScanner.scan();     //todo new Thread?
         });
     }
 
