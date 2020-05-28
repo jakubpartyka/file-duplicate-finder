@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.plaf.FileChooserUI;
+import java.awt.*;
 import java.io.File;
 
 public class MainGui implements Runnable {
@@ -6,6 +8,7 @@ public class MainGui implements Runnable {
     private JTextField directory;
     private JButton browseButton;
     private JPanel contentPanel;
+    private JCheckBox recursiveCheckBox;
 
     //FILES
     private File chosenDirectory;
@@ -27,6 +30,7 @@ public class MainGui implements Runnable {
     private void initFrame() {
         frame = new JFrame();
         frame.setSize(600,600);
+        frame.setMinimumSize(new Dimension(300,300));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(contentPanel);
@@ -38,8 +42,14 @@ public class MainGui implements Runnable {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fileChooser.setCurrentDirectory(chosenDirectory);
-
-
+            int returnVal = fileChooser.showOpenDialog(null);
+            if(returnVal == JFileChooser.APPROVE_OPTION)
+                setChosenDirectory(fileChooser.getSelectedFile());
         });
+    }
+
+    private void setChosenDirectory(File chosenDirectory) {
+        this.chosenDirectory = chosenDirectory;
+        directory.setText(chosenDirectory.getAbsolutePath());
     }
 }
