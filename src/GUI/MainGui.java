@@ -3,7 +3,6 @@ package GUI;
 import FileManagement.FileScanner;
 
 import javax.swing.*;
-import javax.swing.plaf.FileChooserUI;
 import java.awt.*;
 import java.io.File;
 
@@ -13,14 +12,14 @@ public class MainGui implements Runnable {
     private JButton browseButton;
     private JPanel contentPanel;
     private JCheckBox recursiveCheckBox;
-    private JProgressBar progressBar1;
+    private JProgressBar progressBar;
     private JButton scanButton;
 
     //FILES
     private File chosenDirectory;
 
     //FRAME
-    JFrame frame;
+    private JFrame frame;
 
     MainGui(){
         chosenDirectory = new File(System.getProperty("user.home"));
@@ -36,7 +35,7 @@ public class MainGui implements Runnable {
     private void initFrame() {
         frame = new JFrame();
         frame.setSize(600,600);
-        frame.setMinimumSize(new Dimension(300,300));
+        frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(contentPanel);
