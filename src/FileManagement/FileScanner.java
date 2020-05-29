@@ -17,18 +17,18 @@ public class FileScanner extends SwingWorker {
     private String status = "not started";
 
     //all matching files
-    private List<File> allFiles     = new ArrayList<>();
+    private List<ScannerFile> allFiles     = new ArrayList<>();
 
     //duplicate list
-    private List<List<File>> duplicates   = new ArrayList<>();
+    private List<List<ScannerFile>> duplicates   = new ArrayList<>();
 
     //directories to scan
-    private List<File> directoriesToScan = new ArrayList<>();
+    private List<ScannerFile> directoriesToScan = new ArrayList<>();
     
     //output
     private String output = "";
 
-    public FileScanner(List<File> initialDirectories, boolean recursive) throws InvalidDirectoryException {
+    public FileScanner(List<ScannerFile> initialDirectories, boolean recursive) throws InvalidDirectoryException {
         if(initialDirectories.contains(null))
             throw new InvalidDirectoryException();
         else if(initialDirectories.isEmpty())
@@ -51,9 +51,9 @@ public class FileScanner extends SwingWorker {
         if(duplicates.isEmpty())
             appendToOutput("no duplicates");
         else {
-            for (List<File> duplicateList : duplicates) {
+            for (List<ScannerFile> duplicateList : duplicates) {
                 appendToOutput("following files are duplicates:");
-                for (File file : duplicateList) {
+                for (ScannerFile file : duplicateList) {
                     appendToOutput(file.getAbsolutePath());
                 }
                 appendToOutput("\n");
@@ -76,10 +76,11 @@ public class FileScanner extends SwingWorker {
 
         //main loop
         while (!allFiles.isEmpty() && active){
-            File currentFile = allFiles.remove(0);
+            ScannerFile currentFile = allFiles.remove(0);
             List<File> toRemove = new ArrayList<>();
 
-            for (File checkedFile : allFiles) {
+            for (ScannerFile checkedFile : allFiles) {
+                firePropertyChange("currentlyChecking",null,checkedFile.getName());
                 try {
                     boolean equals = FileUtils.contentEquals(currentFile, checkedFile);
 
@@ -89,6 +90,7 @@ public class FileScanner extends SwingWorker {
                         toRemove.add(checkedFile);
                         firePropertyChange("duplicatesFound",null, getDuplicatesCount());
                     }
+
                 } catch (IOException e) {
                     //todo handle exception
                 }
@@ -104,15 +106,15 @@ public class FileScanner extends SwingWorker {
 
     private int getDuplicatesCount() {
         int count = 0;
-        for (List<File> fileList : duplicates) count += fileList.size();
+        for (List<ScannerFile> fileList : duplicates) count += fileList.size();
         count -= duplicates.size();
         return count;
     }
 
-    private void addDuplicates(File file1, File file2) {
+    private void addDuplicates(ScannerFile file1, File file2) {
         boolean alreadyExists = false;
 
-        for (List<File> duplicateListElement : duplicates) {
+        for (List<ScannerFile> duplicateListElement : duplicates) {
             if(duplicateListElement.contains(file1) || duplicateListElement.contains(file2)) {
                 alreadyExists = true;
                 if (!duplicateListElement.contains(file1)) duplicateListElement.add(file1);
@@ -125,19 +127,34 @@ public class FileScanner extends SwingWorker {
     }
 
     private void getFilesFromDirectory() {
-        File currentDir = directoriesToScan.remove(0);
+        ScannerFile currentDir = directoriesToScan.remove(0);
 
         if(currentDir.listFiles() == null)
             return;
 
-        for (File file : currentDir.listFiles()){
+        List<ScannerFile> filesFromDir = convertToScannerFiles(currentDir.listFiles());
+
+        for (ScannerFile file : filesFromDir){
             if(file.isDirectory() && recursive)
                 directoriesToScan.add(file);
             else if(file.isFile())
                 allFiles.add(file);
         }
     }
-    
+
+    /**
+     * converts an array of File objects into an ArrayList of FileScanner objects
+     * @param listFiles array containing files from handled directory
+     * @return returns an ArrayList of FileScanner objects
+     */
+    private List<ScannerFile> convertToScannerFiles(File[] listFiles) {
+        List<ScannerFile> scannerFiles = new ArrayList<>();
+        for (File listFile : listFiles) {
+            scannerFiles.add(new ScannerFile(listFile.getAbsolutePath()));
+        }
+        return scannerFiles;
+    }
+
     private void appendToOutput(String message){
         output += message + "\n";
     }

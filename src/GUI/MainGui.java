@@ -8,13 +8,10 @@ import FileManagement.InvalidDirectoryException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class MainGui implements Runnable {
     //COMPONENTS
@@ -29,12 +26,13 @@ public class MainGui implements Runnable {
     private JLabel currentTask;
     private JButton cancelButton;
     private JLabel duplicatesFound;
+    private JLabel currentlyChecking;
 
     //FRAME
     private JFrame frame;
 
     //FILES
-    private File home;
+    private ScannerFile home;
     private List<File> chosenDirectories = new ArrayList<>();
 
     //SCANNER
@@ -52,6 +50,9 @@ public class MainGui implements Runnable {
         addActionListeners();
     }
 
+    /**
+     * initializes main GUI frame
+     */
     private void initFrame() {
         //FRAME
         frame = new JFrame("Duplicate Finder");
@@ -63,6 +64,9 @@ public class MainGui implements Runnable {
         frame.setVisible(true);
     }
 
+    /**
+     * initiates action listeners for GUI components
+     */
     private void addActionListeners() {
 
         browseButton.addActionListener(e -> {
@@ -72,10 +76,13 @@ public class MainGui implements Runnable {
             fileChooser.setMultiSelectionEnabled(true);
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)
-                directories(fileChooser.getSelectedFiles());
+                setDirectories(fileChooser.getSelectedFiles());
         });
 
         scanButton.addActionListener(e -> {
+            resetStatsComponents();
+
+
             try {
                 fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
                 fileScanner.execute();
@@ -85,6 +92,7 @@ public class MainGui implements Runnable {
                         case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
                         case "status"           : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
                         case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
+                        case "currentlyChecking": currentlyChecking.setText("Currently checking: " + evt.getNewValue().toString()); break;
                         default: break;
                     }
                 });
@@ -97,11 +105,25 @@ public class MainGui implements Runnable {
         cancelButton.addActionListener(e -> fileScanner.setActive(false));
     }
 
-    private void directories(File[] chosenDirectories) {
+    /**
+     *resets statistic-displaying components to its' default values
+     */
+    private void resetStatsComponents() {
+        progressBar.setValue(0);
+        filesScanned.setText("Files scanned: 0");
+        duplicatesFound.setText("Duplicates found: 0");
+        currentlyChecking.setText("Currently checking: none");
+    }
+
+    /**
+     * @param chosenDirectories directories passed from FileChooser
+     * sets list of directories to be used for scanning
+     */
+    private void setDirectories(File[] chosenDirectories) {
         this.chosenDirectories.clear();
         this.chosenDirectories.addAll(Arrays.asList(chosenDirectories));
         if(chosenDirectories.length > 1)
-            directory.setText("multiple directories selected");
+            directory.setText("multiple setDirectories selected");
         else
             directory.setText(chosenDirectories[0].getAbsolutePath());
     }
