@@ -39,12 +39,12 @@ public class FileScanner extends SwingWorker {
     @Override
     protected Object doInBackground() throws Exception {
         //find all files to compare
-//        firePropertyChange("currentTask",null,"Preparing files ...");
+        firePropertyChange("currentTask",null,"Preparing files ...");
         while (!directoriesToScan.isEmpty())
             getFilesFromDirectory();
 
         //search for duplicates
-//        firePropertyChange("currentTask",null,"Searching for duplicates ...");
+        firePropertyChange("currentTask",null,"Searching for duplicates ...");
         findDuplicates();
 
         if(duplicates.isEmpty())
@@ -58,6 +58,7 @@ public class FileScanner extends SwingWorker {
                 appendToOutput("\n");
             }
         System.out.println(output);
+        firePropertyChange("currentTask",null,"Finished");
         return output;
     }
 

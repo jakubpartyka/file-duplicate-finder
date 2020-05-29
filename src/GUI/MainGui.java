@@ -30,12 +30,14 @@ public class MainGui implements Runnable {
     private JButton cancelButton;
 
     //FRAME
-    JFrame frame;
-    JFrame newFrame;
+    private JFrame frame;
 
     //FILES
     private File home;
     private List<File> chosenDirectories = new ArrayList<>();
+
+    //SCANNER
+    private FileScanner fileScanner;
 
     MainGui(){
         home = new File(System.getProperty("user.home"));
@@ -51,7 +53,7 @@ public class MainGui implements Runnable {
 
     private void initFrame() {
         //FRAME
-        frame = new JFrame();
+        frame = new JFrame("Duplicate Finder");
         frame.setSize(600,600);
         frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
@@ -74,13 +76,13 @@ public class MainGui implements Runnable {
 
         scanButton.addActionListener(e -> {
             try {
-                FileScanner fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
+                fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
                 fileScanner.execute();
-
                 fileScanner.addPropertyChangeListener(evt -> {
                     switch (evt.getPropertyName()){
                         case "progress"     : progressBar.setValue((Integer)evt.getNewValue()); break;
                         case "filesScanned" : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
+                        case "currentTask"  : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
                         default: break;
                     }
                 });
@@ -88,6 +90,11 @@ public class MainGui implements Runnable {
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
             }
+        });
+
+        cancelButton.addActionListener(e -> {
+            if(!fileScanner.cancel(true))
+                JOptionPane.showMessageDialog(null,"Failed to cancel file scan!","Error occurred",JOptionPane.WARNING_MESSAGE);
         });
     }
 
