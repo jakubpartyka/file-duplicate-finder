@@ -25,6 +25,9 @@ public class MainGui implements Runnable {
     private JButton scanButton;
     private JTextArea duplicateOutput;
     private JProgressBar progressBar;
+    private JLabel filesScanned;
+    private JLabel currentTask;
+    private JButton cancelButton;
 
     //FRAME
     JFrame frame;
@@ -75,20 +78,15 @@ public class MainGui implements Runnable {
                 fileScanner.execute();
 
                 fileScanner.addPropertyChangeListener(evt -> {
-                    if ("progress".equals(evt.getPropertyName())) {
-                        progressBar.setValue((Integer)evt.getNewValue());
+                    switch (evt.getPropertyName()){
+                        case "progress"     : progressBar.setValue((Integer)evt.getNewValue()); break;
+                        case "filesScanned" : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
+                        default: break;
                     }
                 });
-
-                frame.setEnabled(false);
-                while (!fileScanner.isDone())
-                    Thread.sleep(100);
-                frame.setEnabled(true);
             }
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();       //todo handle exception
             }
         });
     }

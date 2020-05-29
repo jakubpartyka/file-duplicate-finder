@@ -39,10 +39,12 @@ public class FileScanner extends SwingWorker {
     @Override
     protected Object doInBackground() throws Exception {
         //find all files to compare
+//        firePropertyChange("currentTask",null,"Preparing files ...");
         while (!directoriesToScan.isEmpty())
             getFilesFromDirectory();
 
         //search for duplicates
+//        firePropertyChange("currentTask",null,"Searching for duplicates ...");
         findDuplicates();
 
         if(duplicates.isEmpty())
@@ -81,7 +83,7 @@ public class FileScanner extends SwingWorker {
 
             //set properties
             setProgress((total-allFiles.size())*100/total);
-            ++counter;
+            firePropertyChange("filesScanned",null,++counter);
         }
     }
 
