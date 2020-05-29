@@ -27,6 +27,7 @@ public class MainGui implements Runnable {
     private JLabel status;
     private JButton cancelButton;
     private JLabel duplicatesFound;
+    private JLabel nowChecking;
 
     //FRAME
     private JFrame frame;
@@ -84,6 +85,7 @@ public class MainGui implements Runnable {
                         case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
                         case "status"           : status.setText("Status: " + evt.getNewValue().toString()); break;
                         case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
+                        case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
                         case "done"             :
                             try {
                                 duplicateOutput.setText(fileScanner.get().toString());
@@ -105,8 +107,10 @@ public class MainGui implements Runnable {
 
     private void resetStatsComponents() {
         status.setText("Status: not started");
+        nowChecking.setText("Now checking: none");
         filesScanned.setText("Files scanned: 0");
         duplicatesFound.setText("Duplicates found: 0");
+        duplicateOutput.setText("duplicate files will appear here");
         progressBar.setValue(0);
     }
 

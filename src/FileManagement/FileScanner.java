@@ -80,6 +80,7 @@ public class FileScanner extends SwingWorker {
             List<File> toRemove = new ArrayList<>();
 
             for (File checkedFile : allFiles) {
+                firePropertyChange("nowChecking",null, checkedFile.getName());
                 try {
                     boolean equals = FileUtils.contentEquals(currentFile, checkedFile);
 
