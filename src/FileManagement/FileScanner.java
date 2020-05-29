@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.FileUtils;
 
@@ -48,6 +49,7 @@ public class FileScanner extends SwingWorker {
         firePropertyChange("status",null,"Searching for duplicates ...");
         findDuplicates();
 
+        //prepare output
         if(duplicates.isEmpty())
             appendToOutput("no duplicates");
         else {
@@ -89,6 +91,7 @@ public class FileScanner extends SwingWorker {
                         addDuplicates(currentFile,checkedFile);
                         toRemove.add(checkedFile);
                         firePropertyChange("duplicatesFound",null, getDuplicatesCount());
+                        firePropertyChange("totalSize",null, getDuplicatesSize());
                     }
                 } catch (IOException e) {
                     //todo handle exception
@@ -101,6 +104,12 @@ public class FileScanner extends SwingWorker {
             setProgress((total-allFiles.size())*100/total);
             firePropertyChange("filesScanned",null,++counter);
         }
+    }
+
+    private double getDuplicatesSize() {
+        AtomicLong bytes = new AtomicLong();
+        duplicates.forEach(files -> files.forEach(file -> bytes.addAndGet(file.length())));
+        return (double)(bytes.get()*100/(1000*1000))/100;
     }
 
     private int getDuplicatesCount() {
