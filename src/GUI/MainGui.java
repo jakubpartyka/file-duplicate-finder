@@ -41,9 +41,11 @@ public class MainGui implements Runnable {
     private JLabel duplicatesFound;
     private JLabel nowChecking;
     private JLabel totalSize;
+    private JButton settingsButton;
 
-    //FRAME
+    //FRAME AND REMOTE VIEWS
     private JFrame frame;
+    private JPanel settingsPanel;
 
     //FILES
     private File home;
@@ -61,6 +63,7 @@ public class MainGui implements Runnable {
     @Override
     public void run() {
         initFrame();
+        initRemoteViews();
         addActionListeners();
     }
 
@@ -81,6 +84,11 @@ public class MainGui implements Runnable {
      * creates action listeners for main view components
      */
     private void addActionListeners() {
+        settingsButton.addActionListener(e -> {
+            contentPanel.setVisible(false);
+            settingsPanel.setVisible(true);
+        });
+
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -115,6 +123,21 @@ public class MainGui implements Runnable {
         });
 
         cancelButton.addActionListener(e -> fileScanner.setActive(false));
+    }
+
+    /**
+     * initializes remote panels objects
+     */
+    private void initRemoteViews() {
+        //SETTINGS PANEL
+        Settings settings = new Settings();
+        settingsPanel = settings.getSettingsPanel();
+        settingsPanel.setVisible(false);
+        frame.add(settingsPanel);
+        settings.getSaveButton().addActionListener(e -> {
+            settingsPanel.setVisible(false);
+            contentPanel.setVisible(true);
+        });
     }
 
     /**
