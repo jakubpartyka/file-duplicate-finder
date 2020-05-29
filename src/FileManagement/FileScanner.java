@@ -69,6 +69,9 @@ public class FileScanner extends SwingWorker {
         return output;
     }
 
+    /**
+     * compares files to each other to find duplicates
+     */
     private void findDuplicates() {
         //vars for stats and progress
         int counter = 0;
@@ -104,12 +107,20 @@ public class FileScanner extends SwingWorker {
         }
     }
 
+    /**
+     * returns disk space size used by duplicated files
+     * @return total size of duplicated files in MB
+     */
     private double getDuplicatesSize() {
         AtomicLong bytes = new AtomicLong();
         duplicates.forEach(files -> files.forEach(file -> bytes.addAndGet(file.length())));
         return (double)(bytes.get()*100/(1000*1000))/100;
     }
 
+    /**
+     * returns number of duplicated files (not counting the "original" file)
+     * @return number of duplicated files
+     */
     private int getDuplicatesCount() {
         int count = 0;
         for (List<File> fileList : duplicates) count += fileList.size();
@@ -117,6 +128,11 @@ public class FileScanner extends SwingWorker {
         return count;
     }
 
+    /**
+     * adds found duplicated file to corresponding ArrayList
+     * @param file1 first duplicated file copy
+     * @param file2 second duplicated file copy
+     */
     private void addDuplicates(File file1, File file2) {
         boolean alreadyExists = false;
 
@@ -132,6 +148,9 @@ public class FileScanner extends SwingWorker {
             duplicates.add(new ArrayList<>(Arrays.asList(file1,file2)));
     }
 
+    /**
+     * scans next directory and adds matching files to scan queue
+     */
     private void getFilesFromDirectory() {
         File currentDir = directoriesToScan.remove(0);
 

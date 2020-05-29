@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class MainGui implements Runnable {
     //COMPONENTS
     private JTextField directory;
@@ -63,8 +64,10 @@ public class MainGui implements Runnable {
         addActionListeners();
     }
 
+    /**
+     * creates and shows main GUI frame
+     */
     private void initFrame() {
-        //FRAME
         frame = new JFrame("Duplicate Finder");
         frame.setSize(600,600);
         frame.setMinimumSize(new Dimension(300,100));
@@ -74,8 +77,10 @@ public class MainGui implements Runnable {
         frame.setVisible(true);
     }
 
+    /**
+     * creates action listeners for main view components
+     */
     private void addActionListeners() {
-
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -83,7 +88,7 @@ public class MainGui implements Runnable {
             fileChooser.setMultiSelectionEnabled(true);
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)
-                directories(fileChooser.getSelectedFiles());
+                setDirectories(fileChooser.getSelectedFiles());
         });
 
         scanButton.addActionListener(e -> {
@@ -112,6 +117,9 @@ public class MainGui implements Runnable {
         cancelButton.addActionListener(e -> fileScanner.setActive(false));
     }
 
+    /**
+     * contains code to execute at end of scan
+     */
     private void end() {
         //set output
         try {
@@ -124,6 +132,9 @@ public class MainGui implements Runnable {
         nowChecking.setText("Now checking: none");
     }
 
+    /**
+     * sets UI statistics components to default values
+     */
     private void resetStatsComponents() {
         status.setText("Status: not started");
         nowChecking.setText("Now checking: none");
@@ -134,11 +145,15 @@ public class MainGui implements Runnable {
         progressBar.setValue(0);
     }
 
-    private void directories(File[] chosenDirectories) {
+    /**
+     * sets target directories basing on FileChooser output
+     * @param chosenDirectories directories passed from FileChooser
+     */
+    private void setDirectories(File[] chosenDirectories) {
         this.chosenDirectories.clear();
         this.chosenDirectories.addAll(Arrays.asList(chosenDirectories));
         if(chosenDirectories.length > 1)
-            directory.setText("multiple directories selected");
+            directory.setText("multiple setDirectories selected");
         else
             directory.setText(chosenDirectories[0].getAbsolutePath());
     }
