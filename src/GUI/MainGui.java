@@ -8,9 +8,13 @@ import FileManagement.InvalidDirectoryException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class MainGui implements Runnable {
     //COMPONENTS
@@ -20,6 +24,11 @@ public class MainGui implements Runnable {
     private JCheckBox recursiveCheckBox;
     private JButton scanButton;
     private JTextArea duplicateOutput;
+    private JProgressBar progressBar;
+
+    //FRAME
+    JFrame frame;
+    JFrame newFrame;
 
     //FILES
     private File home;
@@ -39,7 +48,7 @@ public class MainGui implements Runnable {
 
     private void initFrame() {
         //FRAME
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         frame.setSize(600,600);
         frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
@@ -49,6 +58,7 @@ public class MainGui implements Runnable {
     }
 
     private void addActionListeners() {
+
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -56,22 +66,36 @@ public class MainGui implements Runnable {
             fileChooser.setMultiSelectionEnabled(true);
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)
-                setChosenDirectory(fileChooser.getSelectedFiles());
+                directories(fileChooser.getSelectedFiles());
         });
 
         scanButton.addActionListener(e -> {
             try {
                 FileScanner fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
-                fileScanner.scan();     //todo new Thread?
-                duplicateOutput.setText(fileScanner.getOutput());
+                fileScanner.execute();
+
+                fileScanner.addPropertyChangeListener(evt -> {
+                    if ("progress".equals(evt.getPropertyName())) {
+                        progressBar.setValue((Integer)evt.getNewValue());
+                    }
+                });
+
+                frame.setEnabled(false);
+                while (!fileScanner.isDone())
+                    Thread.sleep(100);
+                frame.setEnabled(true);
             }
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();       //todo handle exception
             }
         });
     }
 
-    private void setChosenDirectory(File[] chosenDirectories) {
+    private void directories(File[] chosenDirectories) {
+        this.chosenDirectories.clear();
+        this.chosenDirectories.addAll(Arrays.asList(chosenDirectories));
         if(chosenDirectories.length > 1)
             directory.setText("multiple directories selected");
         else

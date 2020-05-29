@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 
+import javax.swing.*;
+
 @SuppressWarnings("ConstantConditions")
-public class FileScanner {
+public class FileScanner extends SwingWorker {
     private boolean recursive;
+    //COMPONENTS TO UPDATE
 
     //all matching files
     private List<File> allFiles     = new ArrayList<>();
@@ -32,7 +36,8 @@ public class FileScanner {
         this.recursive = recursive;
     }
 
-    public void scan() {
+    @Override
+    protected Object doInBackground() throws Exception {
         //find all files to compare
         while (!directoriesToScan.isEmpty())
             getFilesFromDirectory();
@@ -40,7 +45,6 @@ public class FileScanner {
         //search for duplicates
         findDuplicates();
 
-        //test - print duplicates
         if(duplicates.isEmpty())
             appendToOutput("no duplicates");
         else
@@ -51,9 +55,13 @@ public class FileScanner {
                 }
                 appendToOutput("\n");
             }
+        System.out.println(output);
+        return output;
     }
 
     private void findDuplicates() {
+        int counter = 0;
+        int total = allFiles.size();
         while (!allFiles.isEmpty()){
             File currentFile = allFiles.remove(0);
 
@@ -70,6 +78,10 @@ public class FileScanner {
                 }
             }
             allFiles.removeAll(toRemove);           //remove from allFiles
+
+            //set properties
+            setProgress((total-allFiles.size())*100/total);
+            ++counter;
         }
     }
 
@@ -104,9 +116,5 @@ public class FileScanner {
     
     private void appendToOutput(String message){
         output += message + "\n";
-    }
-
-    public String getOutput() {
-        return output;
     }
 }
