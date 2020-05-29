@@ -13,7 +13,8 @@ import javax.swing.*;
 @SuppressWarnings("ConstantConditions")
 public class FileScanner extends SwingWorker {
     private boolean recursive;
-    //COMPONENTS TO UPDATE
+    private boolean active = true;
+    private String status = "not started";
 
     //all matching files
     private List<File> allFiles     = new ArrayList<>();
@@ -39,17 +40,17 @@ public class FileScanner extends SwingWorker {
     @Override
     protected Object doInBackground() throws Exception {
         //find all files to compare
-        firePropertyChange("currentTask",null,"Preparing files ...");
-        while (!directoriesToScan.isEmpty())
+        firePropertyChange("status",null,"Preparing files ...");
+        while (!directoriesToScan.isEmpty() && active)
             getFilesFromDirectory();
 
         //search for duplicates
-        firePropertyChange("currentTask",null,"Searching for duplicates ...");
+        firePropertyChange("status",null,"Searching for duplicates ...");
         findDuplicates();
 
         if(duplicates.isEmpty())
             appendToOutput("no duplicates");
-        else
+        else {
             for (List<File> duplicateList : duplicates) {
                 appendToOutput("following files are duplicates:");
                 for (File file : duplicateList) {
@@ -57,15 +58,24 @@ public class FileScanner extends SwingWorker {
                 }
                 appendToOutput("\n");
             }
+        }
+
         System.out.println(output);
-        firePropertyChange("currentTask",null,"Finished");
+
+        //set status on exit
+        if(!status.equals("cancelled"))
+        firePropertyChange("status",null,"Finished");
+
         return output;
     }
 
     private void findDuplicates() {
+        //vars for stats and progress
         int counter = 0;
         int total = allFiles.size();
-        while (!allFiles.isEmpty()){
+
+        //main loop
+        while (!allFiles.isEmpty() && active){
             File currentFile = allFiles.remove(0);
 
             List<File> toRemove = new ArrayList<>();
@@ -80,7 +90,7 @@ public class FileScanner extends SwingWorker {
                     //todo handle exception
                 }
             }
-            allFiles.removeAll(toRemove);           //remove from allFiles
+            allFiles.removeAll(toRemove);           //remove from allFiles found duplicates
 
             //set properties
             setProgress((total-allFiles.size())*100/total);
@@ -119,5 +129,11 @@ public class FileScanner extends SwingWorker {
     
     private void appendToOutput(String message){
         output += message + "\n";
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+        status = "cancelled";
+        firePropertyChange("status",null, status);
     }
 }

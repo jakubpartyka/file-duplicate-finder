@@ -82,7 +82,7 @@ public class MainGui implements Runnable {
                     switch (evt.getPropertyName()){
                         case "progress"     : progressBar.setValue((Integer)evt.getNewValue()); break;
                         case "filesScanned" : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
-                        case "currentTask"  : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
+                        case "status"       : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
                         default: break;
                     }
                 });
@@ -92,10 +92,7 @@ public class MainGui implements Runnable {
             }
         });
 
-        cancelButton.addActionListener(e -> {
-            if(!fileScanner.cancel(true))
-                JOptionPane.showMessageDialog(null,"Failed to cancel file scan!","Error occurred",JOptionPane.WARNING_MESSAGE);
-        });
+        cancelButton.addActionListener(e -> fileScanner.setActive(false));
     }
 
     private void directories(File[] chosenDirectories) {
