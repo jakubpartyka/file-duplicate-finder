@@ -1,7 +1,18 @@
 package GUI;
 
 //todo add scan time calculation
-//todo stats (number of scanned files)
+//todo disallow multiple scans at the same time + cancel button show/hide
+//todo progress bar more discrete
+//todo last used dir should be saved
+//todo total dup size set -> display GB
+//todo idea -> display files with size
+//todo increment files scanned counter when duplicates are detected
+
+/*todo settings
+* mode: ignore / accept only
+* what to do
+* save output to file + save current output
+* */
 
 import FileManagement.FileScanner;
 import FileManagement.InvalidDirectoryException;
@@ -88,13 +99,7 @@ public class MainGui implements Runnable {
                         case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
                         case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
                         case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString() + " MB"); break;
-                        case "done"             :
-                            try {
-                                duplicateOutput.setText(fileScanner.get().toString());
-                            } catch (InterruptedException | ExecutionException e1) {
-                                e1.printStackTrace();
-                            }
-                            break;
+                        case "done"             : end(); break;
                         default: break;
                     }
                 });
@@ -105,6 +110,18 @@ public class MainGui implements Runnable {
         });
 
         cancelButton.addActionListener(e -> fileScanner.setActive(false));
+    }
+
+    private void end() {
+        //set output
+        try {
+            duplicateOutput.setText(fileScanner.get().toString());
+        } catch (InterruptedException | ExecutionException e1) {
+            e1.printStackTrace();
+        }
+
+        //clear now checking label
+        nowChecking.setText("Now checking: none");
     }
 
     private void resetStatsComponents() {

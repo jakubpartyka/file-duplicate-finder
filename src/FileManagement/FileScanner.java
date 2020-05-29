@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.io.FileUtils;
-
 import javax.swing.*;
 
 @SuppressWarnings("ConstantConditions")
