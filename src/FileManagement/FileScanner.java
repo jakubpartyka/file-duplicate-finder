@@ -65,7 +65,7 @@ public class FileScanner extends SwingWorker {
         //set status on exit
         if(!status.equals("cancelled"))
         firePropertyChange("status",null,"completed successfully");
-
+        firePropertyChange("done",null,"done");
         return output;
     }
 

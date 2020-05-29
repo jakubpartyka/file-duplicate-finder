@@ -8,13 +8,11 @@ import FileManagement.InvalidDirectoryException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class MainGui implements Runnable {
     //COMPONENTS
@@ -26,7 +24,7 @@ public class MainGui implements Runnable {
     private JTextArea duplicateOutput;
     private JProgressBar progressBar;
     private JLabel filesScanned;
-    private JLabel currentTask;
+    private JLabel status;
     private JButton cancelButton;
     private JLabel duplicatesFound;
 
@@ -76,6 +74,7 @@ public class MainGui implements Runnable {
         });
 
         scanButton.addActionListener(e -> {
+            resetStatsComponents();
             try {
                 fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
                 fileScanner.execute();
@@ -83,8 +82,15 @@ public class MainGui implements Runnable {
                     switch (evt.getPropertyName()){
                         case "progress"         : progressBar.setValue((Integer)evt.getNewValue()); break;
                         case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
-                        case "status"           : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
+                        case "status"           : status.setText("Status: " + evt.getNewValue().toString()); break;
                         case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
+                        case "done"             :
+                            try {
+                                duplicateOutput.setText(fileScanner.get().toString());
+                            } catch (InterruptedException | ExecutionException e1) {
+                                e1.printStackTrace();
+                            }
+                            break;
                         default: break;
                     }
                 });
@@ -95,6 +101,13 @@ public class MainGui implements Runnable {
         });
 
         cancelButton.addActionListener(e -> fileScanner.setActive(false));
+    }
+
+    private void resetStatsComponents() {
+        status.setText("Status: not started");
+        filesScanned.setText("Files scanned: 0");
+        duplicatesFound.setText("Duplicates found: 0");
+        progressBar.setValue(0);
     }
 
     private void directories(File[] chosenDirectories) {
