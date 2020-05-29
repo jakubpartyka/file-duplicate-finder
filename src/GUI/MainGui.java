@@ -113,7 +113,7 @@ public class MainGui implements Runnable {
         filesScanned.setText("Files scanned: 0");
         duplicatesFound.setText("Duplicates found: 0");
         totalSize.setText("Duplicates total size: 0.00 MB");
-        duplicateOutput.setText("duplicate files will appear here");
+        duplicateOutput.setText("duplicate files will appear here after scan is completed");
         progressBar.setValue(0);
     }
 

@@ -70,7 +70,7 @@
               <editable value="false"/>
               <font name="Monospaced" style="2"/>
               <foreground color="-7697782"/>
-              <text value="duplicate files will appear here"/>
+              <text value="duplicate files will appear here after scan is completed"/>
             </properties>
           </component>
         </children>
