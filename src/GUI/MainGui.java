@@ -28,6 +28,7 @@ public class MainGui implements Runnable {
     private JLabel filesScanned;
     private JLabel currentTask;
     private JButton cancelButton;
+    private JLabel duplicatesFound;
 
     //FRAME
     private JFrame frame;
@@ -80,9 +81,10 @@ public class MainGui implements Runnable {
                 fileScanner.execute();
                 fileScanner.addPropertyChangeListener(evt -> {
                     switch (evt.getPropertyName()){
-                        case "progress"     : progressBar.setValue((Integer)evt.getNewValue()); break;
-                        case "filesScanned" : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
-                        case "status"       : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
+                        case "progress"         : progressBar.setValue((Integer)evt.getNewValue()); break;
+                        case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
+                        case "status"           : currentTask.setText("Status: " + evt.getNewValue().toString()); break;
+                        case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
                         default: break;
                     }
                 });

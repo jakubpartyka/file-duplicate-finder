@@ -64,7 +64,7 @@ public class FileScanner extends SwingWorker {
 
         //set status on exit
         if(!status.equals("cancelled"))
-        firePropertyChange("status",null,"Finished");
+        firePropertyChange("status",null,"completed successfully");
 
         return output;
     }
@@ -77,25 +77,36 @@ public class FileScanner extends SwingWorker {
         //main loop
         while (!allFiles.isEmpty() && active){
             File currentFile = allFiles.remove(0);
-
             List<File> toRemove = new ArrayList<>();
+
             for (File checkedFile : allFiles) {
                 try {
                     boolean equals = FileUtils.contentEquals(currentFile, checkedFile);
-                    if(equals){
+
+                    //duplicate found!
+                    if (equals){
                         addDuplicates(currentFile,checkedFile);
                         toRemove.add(checkedFile);
+                        firePropertyChange("duplicatesFound",null, getDuplicatesCount());
                     }
                 } catch (IOException e) {
                     //todo handle exception
                 }
             }
+
             allFiles.removeAll(toRemove);           //remove from allFiles found duplicates
 
             //set properties
             setProgress((total-allFiles.size())*100/total);
             firePropertyChange("filesScanned",null,++counter);
         }
+    }
+
+    private int getDuplicatesCount() {
+        int count = 0;
+        for (List<File> fileList : duplicates) count += fileList.size();
+        count -= duplicates.size();
+        return count;
     }
 
     private void addDuplicates(File file1, File file2) {
