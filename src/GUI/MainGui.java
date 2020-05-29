@@ -1,7 +1,7 @@
 package GUI;
 
 //todo add scan time calculation
-//todo disallow multiple scans at the same time + cancel button show/hide
+//todo disallow multiple scans at the same time
 //todo progress bar more discrete
 //todo last used dir should be saved
 //todo total dup size set -> display GB
@@ -53,6 +53,7 @@ public class MainGui implements Runnable {
 
     //SCANNER
     private FileScanner fileScanner;
+    private boolean scanInProgress = false;
 
     MainGui(){
         home = new File(System.getProperty("user.home"));
@@ -116,13 +117,18 @@ public class MainGui implements Runnable {
                         default: break;
                     }
                 });
+                scanInProgress = true;
+                cancelButton.setEnabled(true);
             }
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
             }
         });
 
-        cancelButton.addActionListener(e -> fileScanner.setActive(false));
+        cancelButton.addActionListener(e -> {
+            fileScanner.setActive(false);
+            if(status.getText().equals("Status: cancelled")) end();
+        });
     }
 
     /**
@@ -153,6 +159,10 @@ public class MainGui implements Runnable {
 
         //clear now checking label
         nowChecking.setText("Now checking: none");
+
+        //set scan in progress & disable cancel
+        scanInProgress = false;
+        cancelButton.setEnabled(false);
     }
 
     /**

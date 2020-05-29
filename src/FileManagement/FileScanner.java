@@ -44,7 +44,6 @@ public class FileScanner extends SwingWorker {
             getFilesFromDirectory();
 
         //search for duplicates
-        firePropertyChange("status",null,"Searching for duplicates ...");
         findDuplicates();
 
         //prepare output
@@ -73,6 +72,9 @@ public class FileScanner extends SwingWorker {
      * compares files to each other to find duplicates
      */
     private void findDuplicates() {
+        //set status
+        if(active) firePropertyChange("status",null,"Searching for duplicates ...");
+
         //vars for stats and progress
         int counter = 0;
         int total = allFiles.size();
