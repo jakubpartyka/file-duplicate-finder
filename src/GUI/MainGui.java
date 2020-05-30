@@ -6,7 +6,7 @@ package GUI;
 //todo total dup size set -> display GB
 //todo idea -> display files with size
 //todo increment files scanned counter when duplicates are detected
-//todo optimize duplicates size estimation
+//todo optimize duplicates size estimation method
 //todo ignore by size fields should accept integers only
 
 /*todo settings
@@ -101,6 +101,8 @@ public class MainGui implements Runnable {
         });
 
         scanButton.addActionListener(e -> {
+            if(scanInProgress)
+                return;
             resetStatsComponents();
             try {
                 fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());

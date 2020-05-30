@@ -1,8 +1,6 @@
 package GUI;
 
 import javax.swing.*;
-import javax.swing.text.NumberFormatter;
-import java.text.NumberFormat;
 
 public class Settings {
     private JPanel settingsPanel;
@@ -15,6 +13,12 @@ public class Settings {
     private JCheckBox ignoreFilesSmallerThanCheckBox;
     private JCheckBox ignoreFilesBiggerThanCheckbox;
     private JTextField biggerTextField;
+    private JRadioButton doNothingRadioButton;
+    private JRadioButton keepOnlyNewestRadioButton;
+    private JRadioButton askMeRadioButton;
+    private JTextField logOutputTextField;
+    private JButton browseButton;
+    private JCheckBox saveReportToFileCheckBox;
 
     public Settings() {
         initComponents();
@@ -22,22 +26,27 @@ public class Settings {
     }
 
     private void initComponents() {
-        NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
-        formatter.setValueClass(Integer.class);
-        formatter.setMinimum(0);
-        formatter.setMaximum(Integer.MAX_VALUE);
-        formatter.setAllowsInvalid(false);
-        // If you want the value to be committed on each keystroke instead of focus lost)
+//        NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
+//        formatter.setValueClass(Integer.class);
+//        formatter.setMinimum(0);
+//        formatter.setMaximum(Integer.MAX_VALUE);
+//        formatter.setAllowsInvalid(false);
+        ButtonGroup group = new ButtonGroup();
+        group.add(doNothingRadioButton);
+        group.add(keepOnlyNewestRadioButton);
+        group.add(askMeRadioButton);
     }
 
     /**
      * add action listeners to UI components
      */
     private void addActionListeners() {
+        //enabling / disabling input fields on checkbox click
         acceptFilesThatMatchCheckBox.addActionListener(e -> acceptPatterns.setEnabled(acceptFilesThatMatchCheckBox.isSelected()));
         ignoreFilesThatMatchCheckBox.addActionListener(e -> ignorePatterns.setEnabled(ignoreFilesThatMatchCheckBox.isSelected()));
         ignoreFilesSmallerThanCheckBox.addActionListener(e -> smallerTextField.setEnabled(ignoreFilesSmallerThanCheckBox.isSelected()));
         ignoreFilesBiggerThanCheckbox.addActionListener(e -> biggerTextField.setEnabled(ignoreFilesBiggerThanCheckbox.isSelected()));
+        saveReportToFileCheckBox.addActionListener(e -> logOutputTextField.setEnabled(saveReportToFileCheckBox.isSelected()));
     }
 
     /**
