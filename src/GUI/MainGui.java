@@ -1,4 +1,4 @@
-package GUI;
+package gui;
 
 //todo add scan time calculation
 //todo progress bar more discrete
@@ -8,14 +8,10 @@ package GUI;
 //todo increment files scanned counter when duplicates are detected
 //todo optimize duplicates size estimation method
 //todo ignore by size fields should accept integers only
+//todo move scan recursively checkbox to settings
 
-/*todo settings
-* what to do in case of duplicate
-* save output to file + save current output
-* */
-
-import FileManagement.FileScanner;
-import FileManagement.InvalidDirectoryException;
+import file_management.FileScanner;
+import file_management.InvalidDirectoryException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +66,7 @@ public class MainGui implements Runnable {
     }
 
     /**
-     * creates and shows main GUI frame
+     * creates and shows main gui frame
      */
     private void initFrame() {
         frame = new JFrame("Duplicate Finder");
@@ -90,7 +86,7 @@ public class MainGui implements Runnable {
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            fileChooser.setCurrentDirectory(home);
+            fileChooser.setCurrentDirectory(new File(chosenDirectories.get(0).getAbsolutePath()));
             fileChooser.setMultiSelectionEnabled(true);
             int returnVal = fileChooser.showOpenDialog(null);
             if(returnVal == JFileChooser.APPROVE_OPTION)

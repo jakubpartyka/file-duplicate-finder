@@ -1,6 +1,6 @@
-package GUI;
+package gui;
 
-import FileManagement.FileValidator;
+import file_management.FileValidator;
 
 import javax.swing.*;
 
@@ -15,13 +15,16 @@ public class Settings {
     private JCheckBox ignoreFilesSmallerThanCheckBox;
     private JCheckBox ignoreFilesBiggerThanCheckbox;
     private JTextField biggerTextField;
-    private JRadioButton doNothingRadioButton;
-    private JRadioButton keepOnlyNewestRadioButton;
-    private JRadioButton askMeRadioButton;
+    private JRadioButton doNothingRB;
+    private JRadioButton symbolicLinksRB;
+    private JRadioButton decideManuallyRB;
     private JTextField logOutputTextField;
     private JButton browseButton;
     private JCheckBox saveReportToFileCheckBox;
     private JButton cancelButton;
+    private JRadioButton mergeNewFolderRB;
+
+    private ButtonGroup group = new ButtonGroup();
 
     public Settings() {
         initComponents();
@@ -34,11 +37,11 @@ public class Settings {
 //        formatter.setMinimum(0);
 //        formatter.setMaximum(Integer.MAX_VALUE);
 //        formatter.setAllowsInvalid(false);
-        ButtonGroup group = new ButtonGroup();
-        group.add(doNothingRadioButton);
-        group.add(keepOnlyNewestRadioButton);
-        group.add(askMeRadioButton);
-    }
+        group.add(decideManuallyRB);
+        group.add(symbolicLinksRB);
+        group.add(mergeNewFolderRB);
+        group.add(doNothingRB);
+}
 
     /**
      * add action listeners to UI components

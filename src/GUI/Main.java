@@ -1,4 +1,4 @@
-package GUI;
+package gui;
 
 import javax.swing.*;
 
@@ -13,3 +13,10 @@ public class Main {
         SwingUtilities.invokeLater(new MainGui());
     }
 }
+
+
+//todo
+//move to one unified folder (keep one) and link others in text
+//UNIX -> file shortcut
+//list all in jtable, enable sorting, group by byte content
+//todo delete if parent the same (checkbox)

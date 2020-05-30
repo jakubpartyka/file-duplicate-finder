@@ -1,4 +1,4 @@
-package FileManagement;
+package file_management;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class FileValidator {
     /**
      * Sets a set of patters that file has to match to be validated.
      * Whitespaces occurring in pattern are ignored.
-     * @param rawInput raw text from "files to accept" GUI
+     * @param rawInput raw text from "files to accept" gui
      */
     public static void setAccept(String rawInput){
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(rawInput.split("\n")));
@@ -59,7 +59,7 @@ public class FileValidator {
     /**
      * Sets a set of patters that file can <b>not</b> match to be validated.
      * Whitespaces occurring in pattern are ignored.
-     * @param rawInput raw text from "files to ignore" GUI
+     * @param rawInput raw text from "files to ignore" gui
      */
     public static void setIgnore(String rawInput){
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(rawInput.split("\n")));

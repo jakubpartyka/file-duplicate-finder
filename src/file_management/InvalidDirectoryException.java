@@ -1,4 +1,4 @@
-package FileManagement;
+package file_management;
 
 public class InvalidDirectoryException extends Exception {
     InvalidDirectoryException() {
