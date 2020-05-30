@@ -86,11 +86,6 @@ public class MainGui implements Runnable {
      * creates action listeners for main view components
      */
     private void addActionListeners() {
-        settingsButton.addActionListener(e -> {
-            contentPanel.setVisible(false);
-            settingsPanel.setVisible(true);
-        });
-
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -127,9 +122,15 @@ public class MainGui implements Runnable {
             }
         });
 
+        //FOREIGN COMPONENTS
         cancelButton.addActionListener(e -> {
             fileScanner.setActive(false);
             if(status.getText().equals("Status: cancelled")) end();
+        });
+
+        settingsButton.addActionListener(e -> {
+            contentPanel.setVisible(false);
+            settingsPanel.setVisible(true);
         });
     }
 

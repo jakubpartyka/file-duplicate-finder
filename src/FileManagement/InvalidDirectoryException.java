@@ -1,6 +1,6 @@
 package FileManagement;
 
-public class InvalidDirectoryException extends Throwable {
+public class InvalidDirectoryException extends Exception {
     InvalidDirectoryException() {
         super("\"Incorrect initial directory provided: directory is NULL");
     }

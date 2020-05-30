@@ -162,11 +162,11 @@ public class FileScanner extends SwingWorker {
         for (File file : currentDir.listFiles()){
             if(file.isDirectory() && recursive)
                 directoriesToScan.add(file);
-            else if(file.isFile())
+            else if(file.isFile() && FileValidator.validate(file))
                 allFiles.add(file);
         }
     }
-    
+
     private void appendToOutput(String message){
         output += message + "\n";
     }
