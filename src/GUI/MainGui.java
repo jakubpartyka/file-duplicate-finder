@@ -1,16 +1,16 @@
 package GUI;
 
 //todo add scan time calculation
-//todo disallow multiple scans at the same time
 //todo progress bar more discrete
 //todo last used dir should be saved
 //todo total dup size set -> display GB
 //todo idea -> display files with size
 //todo increment files scanned counter when duplicates are detected
+//todo optimize duplicates size estimation
+//todo ignore by size fields should accept integers only
 
 /*todo settings
-* mode: ignore / accept only
-* what to do
+* what to do in case of duplicate
 * save output to file + save current output
 * */
 
@@ -119,6 +119,7 @@ public class MainGui implements Runnable {
                 });
                 scanInProgress = true;
                 cancelButton.setEnabled(true);
+                scanButton.setEnabled(false);
             }
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
@@ -163,6 +164,7 @@ public class MainGui implements Runnable {
         //set scan in progress & disable cancel
         scanInProgress = false;
         cancelButton.setEnabled(false);
+        scanButton.setEnabled(true);
     }
 
     /**
