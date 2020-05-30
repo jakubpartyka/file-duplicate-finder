@@ -46,6 +46,7 @@ public class MainGui implements Runnable {
     //FRAME AND REMOTE VIEWS
     private JFrame frame;
     private JPanel settingsPanel;
+    private JButton saveButton;
 
     //FILES
     private File home;
@@ -119,9 +120,7 @@ public class MainGui implements Runnable {
                         default: break;
                     }
                 });
-                scanInProgress = true;
-                cancelButton.setEnabled(true);
-                scanButton.setEnabled(false);
+                scanStart();
             }
             catch (InvalidDirectoryException exception){
                 JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
@@ -143,7 +142,13 @@ public class MainGui implements Runnable {
         settingsPanel = settings.getSettingsPanel();
         settingsPanel.setVisible(false);
         frame.add(settingsPanel);
-        settings.getSaveButton().addActionListener(e -> {
+        saveButton = settings.getSaveButton();
+        saveButton.addActionListener(e -> {
+            settingsPanel.setVisible(false);
+            contentPanel.setVisible(true);
+            //todo settings save
+        });
+        settings.getCancelButton().addActionListener(e -> {
             settingsPanel.setVisible(false);
             contentPanel.setVisible(true);
         });
@@ -164,9 +169,7 @@ public class MainGui implements Runnable {
         nowChecking.setText("Now checking: none");
 
         //set scan in progress & disable cancel
-        scanInProgress = false;
-        cancelButton.setEnabled(false);
-        scanButton.setEnabled(true);
+        scanStop();
     }
 
     /**
@@ -193,5 +196,27 @@ public class MainGui implements Runnable {
             directory.setText("multiple setDirectories selected");
         else
             directory.setText(chosenDirectories[0].getAbsolutePath());
+    }
+
+    /**
+     * set components' state when file scan starts. Opposite of scanStop();
+     */
+    private void scanStart(){
+        scanInProgress = true;
+        cancelButton.setEnabled(true);
+        scanButton.setEnabled(false);
+
+        saveButton.setEnabled(false);
+    }
+
+    /**
+     * set components' state when file scan ends. Opposite of scanStart();
+     */
+    private void scanStop(){
+        scanInProgress = false;
+        cancelButton.setEnabled(false);
+        scanButton.setEnabled(true);
+
+        saveButton.setEnabled(true);
     }
 }

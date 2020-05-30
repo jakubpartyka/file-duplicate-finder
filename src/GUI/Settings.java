@@ -19,6 +19,7 @@ public class Settings {
     private JTextField logOutputTextField;
     private JButton browseButton;
     private JCheckBox saveReportToFileCheckBox;
+    private JButton cancelButton;
 
     public Settings() {
         initComponents();
@@ -61,5 +62,9 @@ public class Settings {
      */
     JButton getSaveButton() {
         return saveButton;
+    }
+
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 }
