@@ -1,10 +1,12 @@
 package GUI;
 
+import FileManagement.FileValidator;
+
 import javax.swing.*;
 
 public class Settings {
     private JPanel settingsPanel;
-    private JButton saveButton;
+    private JButton applyButton;
     private JTextArea acceptPatterns;
     private JTextArea ignorePatterns;
     private JCheckBox acceptFilesThatMatchCheckBox;
@@ -48,6 +50,14 @@ public class Settings {
         ignoreFilesSmallerThanCheckBox.addActionListener(e -> smallerTextField.setEnabled(ignoreFilesSmallerThanCheckBox.isSelected()));
         ignoreFilesBiggerThanCheckbox.addActionListener(e -> biggerTextField.setEnabled(ignoreFilesBiggerThanCheckbox.isSelected()));
         saveReportToFileCheckBox.addActionListener(e -> logOutputTextField.setEnabled(saveReportToFileCheckBox.isSelected()));
+
+        //SAVE SETTINGS
+        applyButton.addActionListener(e -> {
+            FileValidator.setAccept(acceptPatterns.getText());
+            FileValidator.setIgnore(ignorePatterns.getText());
+            FileValidator.setAcceptFilterOn(acceptFilesThatMatchCheckBox.isSelected());
+            FileValidator.setIgnoreFilterOn(ignoreFilesThatMatchCheckBox.isSelected());
+        });
     }
 
     /**
@@ -60,11 +70,11 @@ public class Settings {
     /**
      * @return returns save button object
      */
-    JButton getSaveButton() {
-        return saveButton;
+    JButton getApplyButton() {
+        return applyButton;
     }
 
-    public JButton getCancelButton() {
+    JButton getCancelButton() {
         return cancelButton;
     }
 }

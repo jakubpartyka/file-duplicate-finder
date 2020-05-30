@@ -28,9 +28,9 @@ import java.util.concurrent.ExecutionException;
 @SuppressWarnings("FieldCanBeLocal")
 public class MainGui implements Runnable {
     //COMPONENTS
+    private JPanel contentPanel;
     private JTextField directory;
     private JButton browseButton;
-    private JPanel contentPanel;
     private JCheckBox recursiveCheckBox;
     private JButton scanButton;
     private JTextArea duplicateOutput;
@@ -46,7 +46,7 @@ public class MainGui implements Runnable {
     //FRAME AND REMOTE VIEWS
     private JFrame frame;
     private JPanel settingsPanel;
-    private JButton saveButton;
+    private JButton applyButton;
 
     //FILES
     private File home;
@@ -75,6 +75,7 @@ public class MainGui implements Runnable {
     private void initFrame() {
         frame = new JFrame("Duplicate Finder");
         frame.setSize(600,600);
+        frame.setResizable(true);
         frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -129,8 +130,7 @@ public class MainGui implements Runnable {
         });
 
         settingsButton.addActionListener(e -> {
-            contentPanel.setVisible(false);
-            settingsPanel.setVisible(true);
+            switchView(2);
         });
     }
 
@@ -141,17 +141,13 @@ public class MainGui implements Runnable {
         //SETTINGS PANEL
         Settings settings = new Settings();
         settingsPanel = settings.getSettingsPanel();
-        settingsPanel.setVisible(false);
-        frame.add(settingsPanel);
-        saveButton = settings.getSaveButton();
-        saveButton.addActionListener(e -> {
-            settingsPanel.setVisible(false);
-            contentPanel.setVisible(true);
+        applyButton = settings.getApplyButton();
+        applyButton.addActionListener(e -> {
+            switchView(1);
             //todo settings save
         });
         settings.getCancelButton().addActionListener(e -> {
-            settingsPanel.setVisible(false);
-            contentPanel.setVisible(true);
+            switchView(1);
         });
     }
 
@@ -207,7 +203,7 @@ public class MainGui implements Runnable {
         cancelButton.setEnabled(true);
         scanButton.setEnabled(false);
 
-        saveButton.setEnabled(false);
+        applyButton.setEnabled(false);
     }
 
     /**
@@ -218,6 +214,24 @@ public class MainGui implements Runnable {
         cancelButton.setEnabled(false);
         scanButton.setEnabled(true);
 
-        saveButton.setEnabled(true);
+        applyButton.setEnabled(true);
+    }
+
+    private void switchView(int view){
+        switch (view){
+            case 1:
+                frame.remove(settingsPanel);
+                frame.add(contentPanel);
+                break;
+            case 2:
+                frame.remove(contentPanel);
+                frame.add(settingsPanel);
+                break;
+            case 3:
+                break;
+            default : break;
+        }
+        frame.repaint();
+        frame.revalidate();
     }
 }
