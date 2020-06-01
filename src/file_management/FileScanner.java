@@ -16,10 +16,10 @@ public class FileScanner extends SwingWorker {
     private String status = "not started";
 
     //all matching files
-    private List<File> allFiles     = new ArrayList<>();
+    private List<File> allFiles = new ArrayList<>();
 
     //duplicate list
-    private List<List<File>> duplicates   = new ArrayList<>();
+    private List<List<File>> duplicates = new ArrayList<>();
 
     //directories to scan
     private List<File> directoriesToScan = new ArrayList<>();
@@ -65,7 +65,7 @@ public class FileScanner extends SwingWorker {
         if(!status.equals("cancelled"))
         firePropertyChange("status",null,"completed successfully");
         firePropertyChange("done",null,"done");
-        return output;
+        return duplicates;
     }
 
     /**
@@ -151,7 +151,7 @@ public class FileScanner extends SwingWorker {
     }
 
     /**
-     * scans next directory and adds matching files to scan queue
+     * scans next directory and adds matching files to scan queue. File accepting is done via FileValidator class
      */
     private void getFilesFromDirectory() {
         File currentDir = directoriesToScan.remove(0);
@@ -175,5 +175,9 @@ public class FileScanner extends SwingWorker {
         this.active = active;
         status = "cancelled";
         firePropertyChange("status",null, status);
+    }
+
+    public String getOutput() {
+        return output;
     }
 }

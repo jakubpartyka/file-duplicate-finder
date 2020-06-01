@@ -56,28 +56,47 @@ public class Settings {
 
         //SAVE SETTINGS
         applyButton.addActionListener(e -> {
+            //set FileValidator accept / ignore patterns
             FileValidator.setAccept(acceptPatterns.getText());
             FileValidator.setIgnore(ignorePatterns.getText());
             FileValidator.setAcceptFilterOn(acceptFilesThatMatchCheckBox.isSelected());
             FileValidator.setIgnoreFilterOn(ignoreFilesThatMatchCheckBox.isSelected());
+
+            //set chosen duplicate-handling method
+            MainGui.selectedOptimizer = getSelectedOptimizer();
         });
     }
 
     /**
-     * @return returns settings content panel
+     * @return settings content panel
      */
     JPanel getSettingsPanel() {
         return settingsPanel;
     }
 
     /**
-     * @return returns save button object
+     * @return save button object
      */
     JButton getApplyButton() {
         return applyButton;
     }
 
+    /**
+     * @return cancel button object
+     */
     JButton getCancelButton() {
         return cancelButton;
     }
+
+    /**
+     * Returns int value corresponding to duplicate handling method chosen by user
+     * @return -1 if no Optimizer was selected (do nothing option), 1,2,3 ... accordingly to chosen Optimizer. Value 0 can not be returned - see startOptimizers method in MainGUI
+     */
+    private int getSelectedOptimizer(){
+        if (decideManuallyRB.isSelected()) return 1;
+        if (symbolicLinksRB.isSelected()) return 2;
+        if (mergeNewFolderRB.isSelected()) return 3;
+        return -1;
+    }
+
 }

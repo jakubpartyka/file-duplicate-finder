@@ -1,7 +1,6 @@
 package gui;
 
 //todo add scan time calculation
-//todo progress bar more discrete
 //todo last used dir should be saved
 //todo total dup size set -> display GB
 //todo idea -> display files with size
@@ -12,6 +11,7 @@ package gui;
 
 import file_management.FileScanner;
 import file_management.InvalidDirectoryException;
+import file_management.optimizers.HardLinkCreator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,8 +41,12 @@ public class MainGui implements Runnable {
 
     //FRAME AND REMOTE VIEWS
     private JFrame frame;
-    private JPanel settingsPanel;
     private JButton applyButton;
+    private JProgressBar linkCreatorProgressBar;
+
+    //panels
+    private JPanel settingsPanel;
+    private JPanel symbolicLinkCreatorPanel;
 
     //FILES
     private File home;
@@ -51,6 +55,9 @@ public class MainGui implements Runnable {
     //SCANNER
     private FileScanner fileScanner;
     private boolean scanInProgress = false;
+
+    //OPTIMIZER
+    static int selectedOptimizer;
 
     MainGui(){
         home = new File(System.getProperty("user.home"));
@@ -108,7 +115,18 @@ public class MainGui implements Runnable {
                         case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
                         case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
                         case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString() + " MB"); break;
-                        case "done"             : end(); break;
+                        case "done"             :
+                            //starts optimizer when scanning is finished
+                            try {
+                                //noinspection unchecked
+                                List <List<File>> duplicates = (List<List<File>>) fileScanner.get();
+                                startOptimizer(duplicates);
+                            } catch (InterruptedException | ExecutionException e1) {
+                                JOptionPane.showMessageDialog(null,"Failed to optimize files due to error\n" +
+                                        e1.getMessage(),"Optimizer failed",JOptionPane.WARNING_MESSAGE);
+                                end();
+                            }
+                             break;
                         default: break;
                     }
                 });
@@ -122,12 +140,49 @@ public class MainGui implements Runnable {
         //FOREIGN COMPONENTS
         cancelButton.addActionListener(e -> {
             fileScanner.setActive(false);
-            if(status.getText().equals("Status: cancelled")) end();
+            if(status.getText().equals("Status: cancelled")) scanEnd();
         });
 
         settingsButton.addActionListener(e -> {
             switchView(2);
         });
+    }
+
+    private void startOptimizer(List<List<File>> duplicates) {
+
+        if(selectedOptimizer == 0){
+//            JOptionPane.showMessageDialog(null,"no optimizer was selected!","error",JOptionPane.WARNING_MESSAGE);
+//            end();
+            //fixme
+        }
+        status.setText("Optimizing files");
+
+        switch (selectedOptimizer){
+            case 1:
+                //todo manual
+                break;
+            case 2:
+                switchView(3);
+                HardLinkCreator optimizer = new HardLinkCreator(duplicates);
+                optimizer.execute();
+                optimizer.addPropertyChangeListener(evt -> {
+                    switch (evt.getPropertyName()){
+                        case "prg" :
+                            linkCreatorProgressBar.setValue((Integer)evt.getNewValue());
+                            break;
+                        case "end"      :
+                            switchView(1);
+                            end();
+                            break;
+                        default : break;
+                    }
+                });
+                break;
+            case 3:
+                //todo merge
+                break;
+            default: break;
+        }
     }
 
     /**
@@ -139,30 +194,26 @@ public class MainGui implements Runnable {
         settingsPanel = settings.getSettingsPanel();
         applyButton = settings.getApplyButton();
         applyButton.addActionListener(e -> {
+            //switch view
             switchView(1);
-            //todo settings save
+            //todo add setting save
         });
         settings.getCancelButton().addActionListener(e -> {
             switchView(1);
         });
+
+
+        //SYMBOLIC LINK CREATOR
+        SymbolicLinkCreatorUI creatorUI = new SymbolicLinkCreatorUI();
+        symbolicLinkCreatorPanel = creatorUI.getPanel();
+        linkCreatorProgressBar = creatorUI.getProgressBar();
     }
 
     /**
      * contains code to execute at end of scan
      */
     private void end() {
-        //set output
-        try {
-            duplicateOutput.setText(fileScanner.get().toString());
-        } catch (InterruptedException | ExecutionException e1) {
-            e1.printStackTrace();
-        }
-
-        //clear now checking label
-        nowChecking.setText("Now checking: none");
-
-        //set scan in progress & disable cancel
-        scanStop();
+        scanEnd();
     }
 
     /**
@@ -186,13 +237,13 @@ public class MainGui implements Runnable {
         this.chosenDirectories.clear();
         this.chosenDirectories.addAll(Arrays.asList(chosenDirectories));
         if(chosenDirectories.length > 1)
-            directory.setText("multiple setDirectories selected");
+            directory.setText("multiple directories selected");
         else
             directory.setText(chosenDirectories[0].getAbsolutePath());
     }
 
     /**
-     * set components' state when file scan starts. Opposite of scanStop();
+     * set components' state when file scan starts. Opposite of scanEnd();
      */
     private void scanStart(){
         scanInProgress = true;
@@ -203,9 +254,18 @@ public class MainGui implements Runnable {
     }
 
     /**
-     * set components' state when file scan ends. Opposite of scanStart();
+     * Enables starting new scan and updating settings after it was disabled on scan start.
+     * Should be executed when scan is completed or cancelled.
      */
-    private void scanStop(){
+    private void scanEnd(){
+        //set output
+        duplicateOutput.setText(fileScanner.getOutput());
+
+        //clear now checking label
+        nowChecking.setText("Now checking: none");
+
+        //set scan in progress & disable cancel
+
         scanInProgress = false;
         cancelButton.setEnabled(false);
         scanButton.setEnabled(true);
@@ -213,10 +273,16 @@ public class MainGui implements Runnable {
         applyButton.setEnabled(true);
     }
 
+    /**
+     * View changes should only be performed between main view (1) and other views due to
+     * way of adding/removing JPanels from main JFrame (better method will be implemented in the future)
+     * @param view integer referring to panel that view should be switched to
+     */
     private void switchView(int view){
         switch (view){
             case 1:
                 frame.remove(settingsPanel);
+                frame.remove(symbolicLinkCreatorPanel);
                 frame.add(contentPanel);
                 break;
             case 2:
@@ -224,6 +290,8 @@ public class MainGui implements Runnable {
                 frame.add(settingsPanel);
                 break;
             case 3:
+                frame.remove(contentPanel);
+                frame.add(symbolicLinkCreatorPanel);
                 break;
             default : break;
         }

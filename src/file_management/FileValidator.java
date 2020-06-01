@@ -10,12 +10,20 @@ public class FileValidator {
      * Set of patters that a file has to match to be included in a scan
      */
     private static HashSet<String> accept = new HashSet<>();
+
     /**
      * Set of patterns that a file can not match to be included in a scan. "." matches any hidden file
      */
     private static HashSet<String> ignore = new HashSet<>();
 
+    /**
+     * decides if accept filter should be applied
+     */
     private static boolean acceptFilterOn = false;
+
+    /**
+     * decides if ignore filter should be applied
+     */
     private static boolean ignoreFilterOn = false;
 
 
@@ -23,9 +31,9 @@ public class FileValidator {
     /**
      * Checks if specific file should be added to scan queue regarding filters set by user.
      * <b>
-     * <li>Ignore patterns have higher priority than accept patterns!</li>
-     * <li>If one of the filters (ignore/accept) is inactive other patters are applied</li>
-     * <li>If both filters are inactive in Settings view all files are accepted.</li>
+     * Ignore patterns have higher priority than accept patterns!
+     * If one of the filters (ignore/accept) is inactive other patters are applied
+     * If both filters are inactive in Settings view all files are accepted.
      * </b>
      * @param file file to validate
      * @return true if file should be scanner, false otherwise
