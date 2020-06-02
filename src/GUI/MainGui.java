@@ -12,6 +12,7 @@ package gui;
 import file_management.FileScanner;
 import file_management.InvalidDirectoryException;
 import file_management.optimizers.HardLinkCreator;
+import gui.manualSelectionUI.ManualSelectorUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,10 +44,13 @@ public class MainGui implements Runnable {
     private JFrame frame;
     private JButton applyButton;
     private JProgressBar linkCreatorProgressBar;
+    private ManualSelectorUI manualSelectorUI;
+
 
     //panels
     private JPanel settingsPanel;
     private JPanel symbolicLinkCreatorPanel;
+    private JPanel manualPanel;
 
     //FILES
     private File home;
@@ -151,6 +155,7 @@ public class MainGui implements Runnable {
     private void startOptimizer(List<List<File>> duplicates) {
 
         if(selectedOptimizer == 0){
+            selectedOptimizer = 1;
 //            JOptionPane.showMessageDialog(null,"no optimizer was selected!","error",JOptionPane.WARNING_MESSAGE);
 //            end();
             //fixme
@@ -159,7 +164,9 @@ public class MainGui implements Runnable {
 
         switch (selectedOptimizer){
             case 1:
-                //todo manual
+                switchView(4);
+                manualSelectorUI.initiate(duplicates);
+
                 break;
             case 2:
                 switchView(3);
@@ -207,13 +214,17 @@ public class MainGui implements Runnable {
         SymbolicLinkCreatorUI creatorUI = new SymbolicLinkCreatorUI();
         symbolicLinkCreatorPanel = creatorUI.getPanel();
         linkCreatorProgressBar = creatorUI.getProgressBar();
+
+        manualSelectorUI = new ManualSelectorUI();
+        manualPanel = manualSelectorUI.getManualPanel();
+
     }
 
     /**
      * contains code to execute at end of scan
      */
     private void end() {
-        scanEnd();
+        scanEnd();      //fixme
     }
 
     /**
@@ -263,6 +274,7 @@ public class MainGui implements Runnable {
 
         //clear now checking label
         nowChecking.setText("Now checking: none");
+        status.setText("Status: COMPLETED");
 
         //set scan in progress & disable cancel
 
@@ -293,6 +305,9 @@ public class MainGui implements Runnable {
                 frame.remove(contentPanel);
                 frame.add(symbolicLinkCreatorPanel);
                 break;
+            case 4:
+                frame.remove(contentPanel);
+                frame.add(manualPanel);
             default : break;
         }
         frame.repaint();

@@ -10,7 +10,7 @@ public class SymbolicLinkCreatorUI {
         return panel;
     }
 
-    public JProgressBar getProgressBar() {
+    JProgressBar getProgressBar() {
         return progressBar;
     }
 }
