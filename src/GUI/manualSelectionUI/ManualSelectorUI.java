@@ -1,6 +1,7 @@
 package gui.manualSelectionUI;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -27,16 +28,20 @@ public class ManualSelectorUI {
         initTable(duplicates);
         initActionListeners();
 
+        updateStats();
+
+    }
+
+    private void updateStats() {
         left.setText("Duplicates left: " + model.getFilesCount());
         groupsLeft.setText("Duplicate groups left: " + model.getGroupsCount());
         sizeTaken.setText("Size taken by duplicates: " + model.sizeAsString(model.getTotalSize()));
-
     }
 
     private void initActionListeners() {
         showButton.addActionListener(e -> {
             try {
-                Desktop.getDesktop().open(new File("/Users/admin/"));
+                Desktop.getDesktop().open(new File("/Users/admin/"));           //todo
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -44,6 +49,12 @@ public class ManualSelectorUI {
 
         deleteButton.addActionListener(e -> {
             model.deleteFiles(table.getSelectedRows());
+            updateStats();
+        });
+
+        skipButton.addActionListener(e -> {
+                model.skip(table.getSelectedRows());
+                updateStats();
         });
     }
 
@@ -55,9 +66,15 @@ public class ManualSelectorUI {
         table.revalidate();
         table.getTableHeader().setReorderingAllowed(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);
+        table.getColumnModel().getColumn(0).setWidth(60);
+        table.getColumnModel().getColumn(0).setMaxWidth(100);
     }
 
     public JPanel getManualPanel() {
         return manualPanel;
+    }
+
+    public JButton getGoBackToMainButton() {
+        return goBackToMainButton;
     }
 }

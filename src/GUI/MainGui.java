@@ -45,6 +45,7 @@ public class MainGui implements Runnable {
     private JButton applyButton;
     private JProgressBar linkCreatorProgressBar;
     private ManualSelectorUI manualSelectorUI;
+    private JButton backToMainButton;
 
 
     //panels
@@ -217,6 +218,12 @@ public class MainGui implements Runnable {
 
         manualSelectorUI = new ManualSelectorUI();
         manualPanel = manualSelectorUI.getManualPanel();
+        backToMainButton = manualSelectorUI.getGoBackToMainButton();
+
+        backToMainButton.addActionListener(e -> {
+            scanEnd();
+            switchView(1);
+        });
 
     }
 
@@ -293,6 +300,7 @@ public class MainGui implements Runnable {
     private void switchView(int view){
         switch (view){
             case 1:
+                frame.remove(manualPanel);
                 frame.remove(settingsPanel);
                 frame.remove(symbolicLinkCreatorPanel);
                 frame.add(contentPanel);

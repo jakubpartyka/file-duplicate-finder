@@ -75,12 +75,16 @@ public class TableModel extends AbstractTableModel {
     }
 
     int getGroupsCount() {
+        for (Integer key : groupCounts.keySet()) {
+            if(groupCounts.get(key) < 1)
+                groupCounts.remove(key);
+        }
         return groupCounts.size();
     }
 
     String sizeAsString(long size) {
-        long totalkB = (size /1000);
-        double totalMB = (double) (totalkB*100/1000)/100;
+        double totalkB = (double)(size*100/1000)/100;
+        double totalMB = (totalkB/1000);
         double totalGB = (totalMB/1000);
         if(totalkB < 1000 ) return totalkB + " kB";
         if(totalMB < 1000) return totalMB + " MB";      //fixme
@@ -101,25 +105,51 @@ public class TableModel extends AbstractTableModel {
             else
                 groupControl.put(fileObject.group,groupControl.get(fileObject.group)+1);
 
-            //group deletion check
-            for (Integer group : groupControl.keySet()) {
-                if(groupCounts.get(group).equals(groupControl.get(group))){
-                    JOptionPane.showMessageDialog(null,"Warning. You tried to delete all elements of group: "
-                            + group + "\nThis operation is not allowed","Deletion blocked",JOptionPane.WARNING_MESSAGE);
-
-                    //remove files matching this group
-                    List<FileObject> toRemove = new ArrayList<>();
-                    for (FileObject fileObject1 : filesToDelete) {
-                        if(fileObject1.group == group)
-                            toRemove.add(fileObject1);
-                    }
-                    filesToDelete.removeAll(toRemove);
-                }
-
-            }
-
         }
 
+        //group deletion check
+        for (Integer group : groupControl.keySet()) {
+            if(groupCounts.get(group).equals(groupControl.get(group))){
+                JOptionPane.showMessageDialog(null,"Warning. You tried to delete all elements of group: "
+                        + group + "\nThis operation is not allowed","Deletion blocked",JOptionPane.WARNING_MESSAGE);
 
+                //remove files matching this group
+                List<FileObject> toRemove = new ArrayList<>();
+                for (FileObject fileObject1 : filesToDelete) {
+                    if(fileObject1.group == group)
+                        toRemove.add(fileObject1);
+                }
+                filesToDelete.removeAll(toRemove);
+            }
+        }
+
+        //delete files
+        for (FileObject file : filesToDelete) {
+            int group = file.group;
+
+            if(!file.source.exists())
+                continue;
+
+            if(file.source.delete()) {
+                groupCounts.put(group, groupCounts.get(group) - 1);
+                allFiles.remove(file);
+            }
+            else
+                System.out.println("cannot delete file: " + file.source.getAbsolutePath());
+        }
+
+        fireTableDataChanged();
+
+
+    }
+
+    void skip(int[] selectedRows) {
+        for (int selectedRow : selectedRows) {
+            FileObject fileObject = allFiles.get(selectedRow);
+            int group = fileObject.group;
+            groupCounts.put(group, groupCounts.get(group) - 1);
+            allFiles.remove(fileObject);
+        }
+        fireTableDataChanged();
     }
 }
