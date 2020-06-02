@@ -3,6 +3,7 @@ package gui;
 import file_management.FileValidator;
 
 import javax.swing.*;
+import java.io.File;
 
 public class Settings {
     private JPanel settingsPanel;
@@ -23,8 +24,11 @@ public class Settings {
     private JCheckBox saveReportToFileCheckBox;
     private JButton cancelButton;
     private JRadioButton mergeNewFolderRB;
+    private JTextField mergeOutputDirTextBox;
+    private JButton browseButton1;
 
     private ButtonGroup group = new ButtonGroup();
+    private File mergeDir;
 
     public Settings() {
         initComponents();
@@ -54,6 +58,11 @@ public class Settings {
         ignoreFilesBiggerThanCheckbox.addActionListener(e -> biggerTextField.setEnabled(ignoreFilesBiggerThanCheckbox.isSelected()));
         saveReportToFileCheckBox.addActionListener(e -> logOutputTextField.setEnabled(saveReportToFileCheckBox.isSelected()));
 
+        mergeNewFolderRB.addActionListener(e -> {
+           mergeOutputDirTextBox.setEnabled(mergeNewFolderRB.isEnabled());
+           browseButton1.setEnabled(mergeNewFolderRB.isEnabled());
+        });
+
         //SAVE SETTINGS
         applyButton.addActionListener(e -> {
             //set FileValidator accept / ignore patterns
@@ -65,6 +74,22 @@ public class Settings {
             //set chosen duplicate-handling method
             MainGui.selectedOptimizer = getSelectedOptimizer();
         });
+
+        //SET OUTPUT DIRECTORY FOR MERGE
+        browseButton1.addActionListener(e -> {
+            JFileChooser jfc = new JFileChooser();
+            jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            jfc.setMultiSelectionEnabled(false);
+
+            if (jfc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+                mergeDir = jfc.getSelectedFile();
+                mergeOutputDirTextBox.setText(mergeDir.getAbsolutePath());
+            }
+        });
+    }
+
+    public String getMergeOutputDirectory() {
+        return mergeOutputDirTextBox.getText();
     }
 
     /**

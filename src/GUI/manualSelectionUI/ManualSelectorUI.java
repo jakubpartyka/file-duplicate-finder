@@ -36,7 +36,7 @@ public class ManualSelectorUI {
     private void initActionListeners() {
         showButton.addActionListener(e -> {
             try {
-                Desktop.getDesktop().open(new File("/Users/admin/"));           //todo
+                Desktop.getDesktop().open(new File(model.getFilePath(table.getSelectedRow())).getParentFile());
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

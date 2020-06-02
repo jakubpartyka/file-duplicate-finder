@@ -169,4 +169,8 @@ public class TableModel extends AbstractTableModel {
         bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+    String getFilePath(int selectedRow) {
+        return allFiles.get(selectedRow).source.getAbsolutePath();
+    }
 }

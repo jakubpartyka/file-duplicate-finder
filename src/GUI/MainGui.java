@@ -40,18 +40,22 @@ public class MainGui implements Runnable {
     private JButton settingsButton;
 
     //FRAME AND REMOTE VIEWS
+    private Settings settings;
     private JFrame frame;
     private JButton applyButton;
     private JProgressBar linkCreatorProgressBar;
     private ManualSelectorUI manualSelectorUI;
     private JButton backToMainButton;
     private HardLinkCreatorUI creatorUI;
+    private MergeUI mergeUI;
+    private JProgressBar mergeProgress;
 
 
     //panels
     private JPanel settingsPanel;
     private JPanel symbolicLinkCreatorPanel;
     private JPanel manualPanel;
+    private JPanel mergePanel;
 
     //FILES
     private File home;
@@ -73,7 +77,7 @@ public class MainGui implements Runnable {
     @Override
     public void run() {
         initFrame();
-        initRemoteViews();
+        initRemoteViews(true);
         addActionListeners();
     }
 
@@ -106,40 +110,8 @@ public class MainGui implements Runnable {
         });
 
         scanButton.addActionListener(e -> {
-            if(scanInProgress)
-                return;
-            resetStatsComponents();
-            try {
-                fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
-                fileScanner.execute();
-                fileScanner.addPropertyChangeListener(evt -> {
-                    switch (evt.getPropertyName()){
-                        case "progress"         : progressBar.setValue((Integer)evt.getNewValue()); break;
-                        case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
-                        case "status"           : status.setText("Status: " + evt.getNewValue().toString()); break;
-                        case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
-                        case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
-                        case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString() + " MB"); break;
-                        case "done"             :
-                            //starts optimizer when scanning is finished
-                            try {
-                                //noinspection unchecked
-                                List <List<File>> duplicates = (List<List<File>>) fileScanner.get();
-                                startOptimizer(duplicates);
-                            } catch (InterruptedException | ExecutionException e1) {
-                                JOptionPane.showMessageDialog(null,"Failed to optimize files due to error\n" +
-                                        e1.getMessage(),"Optimizer failed",JOptionPane.WARNING_MESSAGE);
-                                scanEnd();
-                            }
-                             break;
-                        default: break;
-                    }
-                });
-                scanStart();
-            }
-            catch (InvalidDirectoryException exception){
-                JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
-            }
+            startScan();
+
         });
 
         //FOREIGN COMPONENTS
@@ -151,6 +123,44 @@ public class MainGui implements Runnable {
         settingsButton.addActionListener(e -> switchView(2));
     }
 
+    private void startScan() {
+        if(scanInProgress)
+            return;
+        resetStatsComponents();
+        try {
+            fileScanner = new FileScanner(chosenDirectories, recursiveCheckBox.isSelected());
+            //todo add more ignoring filters to scanner
+            fileScanner.execute();
+            fileScanner.addPropertyChangeListener(evt -> {
+                switch (evt.getPropertyName()){
+                    case "progress"         : progressBar.setValue((Integer)evt.getNewValue()); break;
+                    case "filesScanned"     : filesScanned.setText("Files scanned: " + evt.getNewValue().toString()); break;
+                    case "status"           : status.setText("Status: " + evt.getNewValue().toString()); break;
+                    case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
+                    case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
+                    case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString() + " MB"); break;
+                    case "done"             :
+                        //starts optimizer when scanning is finished
+                        try {
+                            //noinspection unchecked
+                            List <List<File>> duplicates = (List<List<File>>) fileScanner.get();
+                            startOptimizer(duplicates);
+                        } catch (InterruptedException | ExecutionException e1) {
+                            JOptionPane.showMessageDialog(null,"Failed to optimize files due to error\n" +
+                                    e1.getMessage(),"Optimizer failed",JOptionPane.WARNING_MESSAGE);
+                            scanEnd();
+                        }
+                        break;
+                    default: break;
+                }
+            });
+            scanStart();
+        }
+        catch (InvalidDirectoryException exception){
+            JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
     private void startOptimizer(List<List<File>> duplicates) {
         status.setText("Optimizing files");
 
@@ -158,8 +168,8 @@ public class MainGui implements Runnable {
             case 1:
                 switchView(4);
                 manualSelectorUI.initiate(duplicates);
-
                 break;
+
             case 2:
                 switchView(3);
                 creatorUI.setDuplicates(duplicates);
@@ -170,15 +180,28 @@ public class MainGui implements Runnable {
                             linkCreatorProgressBar.setValue((Integer)evt.getNewValue());
                             break;
                         case "end"      :
-                            switchView(1);
                             scanEnd();
                             break;
                         default : break;
                     }
                 });
                 break;
+
             case 3:
-                JOptionPane.showMessageDialog(null,"This option is not yet implemented, please select a different one","Warning",JOptionPane.WARNING_MESSAGE);
+                switchView(5);
+                mergeUI.setDuplicates(duplicates);
+                mergeUI.setOutputDirectory(new File(settings.getMergeOutputDirectory()));
+                mergeUI.execute();
+                mergeUI.addPropertyChangeListener(evt -> {
+                    switch (evt.getPropertyName()){
+                        case "prg" :
+                            mergeProgress.setValue((Integer)evt.getNewValue());
+                            break;
+                        case "end" :
+                            scanEnd();
+                            break;
+                    }
+                });
                 break;
             default: break;
         }
@@ -186,18 +209,21 @@ public class MainGui implements Runnable {
 
     /**
      * initializes remote panels objects
+     * @param initSettings decides if settings should be re-initiated, should be true only on first initiation.
      */
-    private void initRemoteViews() {
+    private void initRemoteViews(boolean initSettings) {
         //SETTINGS PANEL
-        Settings settings = new Settings();
-        settingsPanel = settings.getSettingsPanel();
-        applyButton = settings.getApplyButton();
-        applyButton.addActionListener(e -> {
-            //switch view
-            switchView(1);
-            //todo add setting save
-        });
-        settings.getCancelButton().addActionListener(e -> switchView(1));
+        if(initSettings) {
+            settings = new Settings();
+            settingsPanel = settings.getSettingsPanel();
+            applyButton = settings.getApplyButton();
+            applyButton.addActionListener(e -> {
+                //switch view
+                switchView(1);
+                //todo add setting save
+            });
+            settings.getCancelButton().addActionListener(e -> switchView(1));
+        }
 
         //SYMBOLIC LINK CREATOR
         creatorUI = new HardLinkCreatorUI();
@@ -211,9 +237,12 @@ public class MainGui implements Runnable {
 
         backToMainButton.addActionListener(e -> {
             scanEnd();
-            switchView(1);
         });
 
+        //MERGE
+        mergeUI = new MergeUI();
+        mergePanel = mergeUI.getMergePanel();
+        mergeProgress = mergeUI.getProgressBar1();
     }
 
     /**
@@ -258,6 +287,7 @@ public class MainGui implements Runnable {
      * Should be executed when scan is completed or cancelled.
      */
     private void scanEnd(){
+        switchView(1);
         //set output
         duplicateOutput.setText(fileScanner.getOutput());
 
@@ -270,6 +300,8 @@ public class MainGui implements Runnable {
         scanInProgress = false;
         cancelButton.setEnabled(false);
         scanButton.setEnabled(true);
+
+        initRemoteViews(false);
 
         applyButton.setEnabled(true);
     }
@@ -284,6 +316,7 @@ public class MainGui implements Runnable {
             case 1:
                 frame.remove(manualPanel);
                 frame.remove(settingsPanel);
+                frame.remove(mergePanel);
                 frame.remove(symbolicLinkCreatorPanel);
                 frame.add(contentPanel);
                 break;
@@ -298,6 +331,10 @@ public class MainGui implements Runnable {
             case 4:
                 frame.remove(contentPanel);
                 frame.add(manualPanel);
+                break;
+            case 5:
+                frame.remove(contentPanel);
+                frame.add(mergePanel);
             default : break;
         }
         frame.repaint();
