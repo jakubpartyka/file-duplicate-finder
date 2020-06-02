@@ -11,7 +11,6 @@ package gui;
 
 import file_management.FileScanner;
 import file_management.InvalidDirectoryException;
-import file_management.optimizers.HardLinkCreator;
 import gui.manualSelectionUI.ManualSelectorUI;
 
 import javax.swing.*;
@@ -46,6 +45,7 @@ public class MainGui implements Runnable {
     private JProgressBar linkCreatorProgressBar;
     private ManualSelectorUI manualSelectorUI;
     private JButton backToMainButton;
+    private HardLinkCreatorUI creatorUI;
 
 
     //panels
@@ -62,7 +62,7 @@ public class MainGui implements Runnable {
     private boolean scanInProgress = false;
 
     //OPTIMIZER
-    static int selectedOptimizer;
+    static int selectedOptimizer = 1;
 
     MainGui(){
         home = new File(System.getProperty("user.home"));
@@ -129,7 +129,7 @@ public class MainGui implements Runnable {
                             } catch (InterruptedException | ExecutionException e1) {
                                 JOptionPane.showMessageDialog(null,"Failed to optimize files due to error\n" +
                                         e1.getMessage(),"Optimizer failed",JOptionPane.WARNING_MESSAGE);
-                                end();
+                                scanEnd();
                             }
                              break;
                         default: break;
@@ -148,19 +148,10 @@ public class MainGui implements Runnable {
             if(status.getText().equals("Status: cancelled")) scanEnd();
         });
 
-        settingsButton.addActionListener(e -> {
-            switchView(2);
-        });
+        settingsButton.addActionListener(e -> switchView(2));
     }
 
     private void startOptimizer(List<List<File>> duplicates) {
-
-        if(selectedOptimizer == 0){
-            selectedOptimizer = 1;
-//            JOptionPane.showMessageDialog(null,"no optimizer was selected!","error",JOptionPane.WARNING_MESSAGE);
-//            end();
-            //fixme
-        }
         status.setText("Optimizing files");
 
         switch (selectedOptimizer){
@@ -171,23 +162,23 @@ public class MainGui implements Runnable {
                 break;
             case 2:
                 switchView(3);
-                HardLinkCreator optimizer = new HardLinkCreator(duplicates);
-                optimizer.execute();
-                optimizer.addPropertyChangeListener(evt -> {
+                creatorUI.setDuplicates(duplicates);
+                creatorUI.execute();
+                creatorUI.addPropertyChangeListener(evt -> {
                     switch (evt.getPropertyName()){
                         case "prg" :
                             linkCreatorProgressBar.setValue((Integer)evt.getNewValue());
                             break;
                         case "end"      :
                             switchView(1);
-                            end();
+                            scanEnd();
                             break;
                         default : break;
                     }
                 });
                 break;
             case 3:
-                //todo merge
+                JOptionPane.showMessageDialog(null,"This option is not yet implemented, please select a different one","Warning",JOptionPane.WARNING_MESSAGE);
                 break;
             default: break;
         }
@@ -206,16 +197,14 @@ public class MainGui implements Runnable {
             switchView(1);
             //todo add setting save
         });
-        settings.getCancelButton().addActionListener(e -> {
-            switchView(1);
-        });
-
+        settings.getCancelButton().addActionListener(e -> switchView(1));
 
         //SYMBOLIC LINK CREATOR
-        SymbolicLinkCreatorUI creatorUI = new SymbolicLinkCreatorUI();
+        creatorUI = new HardLinkCreatorUI();
         symbolicLinkCreatorPanel = creatorUI.getPanel();
         linkCreatorProgressBar = creatorUI.getProgressBar();
 
+        //MANUAL SELECTOR
         manualSelectorUI = new ManualSelectorUI();
         manualPanel = manualSelectorUI.getManualPanel();
         backToMainButton = manualSelectorUI.getGoBackToMainButton();
@@ -225,13 +214,6 @@ public class MainGui implements Runnable {
             switchView(1);
         });
 
-    }
-
-    /**
-     * contains code to execute at end of scan
-     */
-    private void end() {
-        scanEnd();      //fixme
     }
 
     /**

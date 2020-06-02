@@ -1,7 +1,6 @@
 package gui.manualSelectionUI;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -10,26 +9,22 @@ import java.util.List;
 public class ManualSelectorUI {
     private JPanel manualPanel;
     private JButton deleteButton;
+    @SuppressWarnings("unused")
     private JScrollPane tablePane;
     private JTable table;
     private JButton showButton;
     private JLabel left;
     private JLabel groupsLeft;
     private JLabel sizeTaken;
-    private JCheckBox hideGroupsWithSingleCheckBox;
-    private JCheckBox surpressWarningsCheckBox;
     private JButton skipButton;
     private JButton goBackToMainButton;
 
     private TableModel model;
 
-
     public void initiate(List<List<File>> duplicates){
         initTable(duplicates);
         initActionListeners();
-
         updateStats();
-
     }
 
     private void updateStats() {
@@ -62,12 +57,21 @@ public class ManualSelectorUI {
         model = new TableModel(duplicates);
         //noinspection BoundFieldAssignment
         table.setModel(model);
-        table.repaint();
-        table.revalidate();
+
+        table.setAutoCreateRowSorter(false);
+
+        //set columns
         table.getTableHeader().setReorderingAllowed(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);
         table.getColumnModel().getColumn(0).setWidth(60);
         table.getColumnModel().getColumn(0).setMaxWidth(100);
+        table.getColumnModel().getColumn(1).setMaxWidth(150);
+        table.getColumnModel().getColumn(1).setWidth(100);
+        table.getColumnModel().getColumn(2).setMaxWidth(150);
+
+        //reload table
+        table.repaint();
+        table.revalidate();
     }
 
     public JPanel getManualPanel() {

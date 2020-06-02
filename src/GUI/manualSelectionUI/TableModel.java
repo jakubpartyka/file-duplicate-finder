@@ -1,18 +1,22 @@
 package gui.manualSelectionUI;
 
 import file_management.FileObject;
-
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+//todo sort after all updates (by group count descending)
+
 public class TableModel extends AbstractTableModel {
     private String [] columnNames = {
-            "group no.",
+            "no.",
+            "gr size",
             "size",
             "location",
     };
@@ -47,10 +51,17 @@ public class TableModel extends AbstractTableModel {
         FileObject row = allFiles.get(rowIndex);
         switch (columnIndex){
             case 0: return row.group;
-            case 1: return sizeAsString(row.size);
-            case 2: return row.path;
+            case 1: return sizeAsString(groupSize(rowIndex));
+            case 2: return sizeAsString(row.size);
+            case 3: return row.path;
             default:return 0;
         }
+    }
+
+    private int groupSize(int rowIndex) {
+        FileObject file = allFiles.get(rowIndex);
+        int groupCount = groupCounts.get(file.group);
+        return (int) (groupCount * file.size);
     }
 
     public String getColumnName(int col) {
@@ -59,7 +70,7 @@ public class TableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        if(columnIndex == 2)
+        if(columnIndex == 3)
             return String.class;
         else return Integer.class;
     }
@@ -83,12 +94,12 @@ public class TableModel extends AbstractTableModel {
     }
 
     String sizeAsString(long size) {
-        double totalkB = (double)(size*100/1000)/100;
+        double totalkB = round((double)size/1000);
         double totalMB = (totalkB/1000);
         double totalGB = (totalMB/1000);
-        if(totalkB < 1000 ) return totalkB + " kB";
-        if(totalMB < 1000) return totalMB + " MB";      //fixme
-        else return totalGB + " GB";
+        if(totalkB < 1000 ) return round(totalkB) + " kB";
+        if(totalMB < 1000) return round(totalMB) + " MB";      //fixme
+        else return round(totalGB) + " GB";
     }
 
     void deleteFiles(int[] selectedRows) {
@@ -151,5 +162,11 @@ public class TableModel extends AbstractTableModel {
             allFiles.remove(fileObject);
         }
         fireTableDataChanged();
+    }
+
+    private static double round(double value) {
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }

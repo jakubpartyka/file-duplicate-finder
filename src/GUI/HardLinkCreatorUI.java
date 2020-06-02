@@ -1,4 +1,4 @@
-package file_management.optimizers;
+package gui;
 
 import javax.swing.*;
 import java.io.File;
@@ -8,11 +8,22 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HardLinkCreator extends SwingWorker {
+public class HardLinkCreatorUI extends SwingWorker {
+    private JProgressBar progressBar;
+    private JPanel panel;
+
     private List<List<File>> duplicates;
 
-    public HardLinkCreator(List<List<File>> duplicates) {
+    public void setDuplicates(List<List<File>> duplicates) {
         this.duplicates = duplicates;
+    }
+
+    JPanel getPanel() {
+        return panel;
+    }
+
+    JProgressBar getProgressBar() {
+        return progressBar;
     }
 
     @Override

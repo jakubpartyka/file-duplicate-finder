@@ -8,12 +8,6 @@ public class FileObject {
     public int group;
     public String path;
 
-    public FileObject(File source) {
-        this.source = source;
-        size = source.length();
-        path = source.getAbsolutePath();
-    }
-
     public FileObject(File source, int group) {
         this.source = source;
         this.group = group;

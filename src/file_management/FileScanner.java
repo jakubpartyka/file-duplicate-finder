@@ -37,7 +37,7 @@ public class FileScanner extends SwingWorker {
     }
 
     @Override
-    protected Object doInBackground() throws Exception {
+    protected Object doInBackground() {
         //find all files to compare
         firePropertyChange("status",null,"Preparing files ...");
         while (!directoriesToScan.isEmpty() && active)
