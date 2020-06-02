@@ -15,6 +15,10 @@ public class ManualSelectorUI {
     private JLabel left;
     private JLabel groupsLeft;
     private JLabel sizeTaken;
+    private JCheckBox hideGroupsWithSingleCheckBox;
+    private JCheckBox surpressWarningsCheckBox;
+    private JButton skipButton;
+    private JButton goBackToMainButton;
 
     private TableModel model;
 
@@ -23,10 +27,9 @@ public class ManualSelectorUI {
         initTable(duplicates);
         initActionListeners();
 
-
         left.setText("Duplicates left: " + model.getFilesCount());
         groupsLeft.setText("Duplicate groups left: " + model.getGroupsCount());
-        sizeTaken.setText("Size taken by duplicates: " + model.totalSizeAsString());
+        sizeTaken.setText("Size taken by duplicates: " + model.sizeAsString(model.getTotalSize()));
 
     }
 
@@ -37,6 +40,10 @@ public class ManualSelectorUI {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+        });
+
+        deleteButton.addActionListener(e -> {
+            model.deleteFiles(table.getSelectedRows());
         });
     }
 

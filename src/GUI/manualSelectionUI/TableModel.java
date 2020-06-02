@@ -2,9 +2,11 @@ package gui.manualSelectionUI;
 
 import file_management.FileObject;
 
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,18 +18,18 @@ public class TableModel extends AbstractTableModel {
     };
 
     private List<FileObject> allFiles = new ArrayList<>();
-    private List<Integer>    groups   = new ArrayList<>();
+
+    private HashMap<Integer,Integer> groupCounts = new HashMap<>();
 
     TableModel(List<List<File>> duplicates) {
         int counter = 0;
         for (List<File> fileList : duplicates) {
             counter++;
-            groups.add(counter);
-            for (File file : fileList) {
-                allFiles.add(new FileObject(file,counter));
-            }
-        }
+            int finalCounter = counter;
 
+            groupCounts.put(counter,fileList.size());
+            fileList.forEach(file -> allFiles.add(new FileObject(file, finalCounter)));
+        }
     }
 
     @Override
@@ -45,7 +47,7 @@ public class TableModel extends AbstractTableModel {
         FileObject row = allFiles.get(rowIndex);
         switch (columnIndex){
             case 0: return row.group;
-            case 1: return row.size;
+            case 1: return sizeAsString(row.size);
             case 2: return row.path;
             default:return 0;
         }
@@ -73,17 +75,51 @@ public class TableModel extends AbstractTableModel {
     }
 
     int getGroupsCount() {
-        return groups.size();
+        return groupCounts.size();
     }
 
-    String totalSizeAsString() {
-        long total = getTotalSize();
-        long totalkB = (total/1000);
-        long totalMB = (totalkB/1000);
-        long totalGB = (totalMB/1000);
-        if(total < 1000 ) return totalkB + " kB";
-        if(totalMB < 1000) return totalMB + " MB";
+    String sizeAsString(long size) {
+        long totalkB = (size /1000);
+        double totalMB = (double) (totalkB*100/1000)/100;
+        double totalGB = (totalMB/1000);
+        if(totalkB < 1000 ) return totalkB + " kB";
+        if(totalMB < 1000) return totalMB + " MB";      //fixme
         else return totalGB + " GB";
+    }
+
+    void deleteFiles(int[] selectedRows) {
+        HashMap<Integer, Integer> groupControl = new HashMap<>();
+        List<FileObject> filesToDelete = new ArrayList<>();
+
+        for (int selectedRow : selectedRows) {
+            FileObject fileObject = allFiles.get(selectedRow);
+            filesToDelete.add(fileObject);
+
+            //increment count in group object
+            if(!groupControl.containsKey(fileObject.group))
+                groupControl.put(fileObject.group,1);
+            else
+                groupControl.put(fileObject.group,groupControl.get(fileObject.group)+1);
+
+            //group deletion check
+            for (Integer group : groupControl.keySet()) {
+                if(groupCounts.get(group).equals(groupControl.get(group))){
+                    JOptionPane.showMessageDialog(null,"Warning. You tried to delete all elements of group: "
+                            + group + "\nThis operation is not allowed","Deletion blocked",JOptionPane.WARNING_MESSAGE);
+
+                    //remove files matching this group
+                    List<FileObject> toRemove = new ArrayList<>();
+                    for (FileObject fileObject1 : filesToDelete) {
+                        if(fileObject1.group == group)
+                            toRemove.add(fileObject1);
+                    }
+                    filesToDelete.removeAll(toRemove);
+                }
+
+            }
+
+        }
+
 
     }
 }
