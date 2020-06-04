@@ -26,6 +26,10 @@ public class FileValidator {
      */
     private static boolean ignoreFilterOn = false;
 
+    private static int ignoreSmallerThan = 1000;
+    private static int ignoreBiggerThan = 500;
+    private static boolean smallerThanFilterOn = true;
+    private static boolean biggerThanFilterOn = true;
 
 
     /**
@@ -35,10 +39,10 @@ public class FileValidator {
      * If one of the filters (ignore/accept) is inactive other patters are applied
      * If both filters are inactive in Settings view all files are accepted.
      * </b>
-     * @param file file to validate
+     * @param file file to validate by extension
      * @return true if file should be scanner, false otherwise
      */
-    static boolean validate(File file){
+    static boolean validateExtension(File file){
         if(!ignoreFilterOn && !acceptFilterOn)  //filters not applied, all files accepted
             return true;
 
@@ -47,7 +51,7 @@ public class FileValidator {
             return false;                       //if matches ignore patters return false
 
         if(!acceptFilterOn) return true;                //accept filter inactive but passed ignore filter -> return true
-        else return matchesAcceptPatterns(filename);    //return true if matches accepted pattern
+        else return validateAcceptPatterns(filename);    //return true if matches accepted pattern
     }
 
     /**
@@ -107,7 +111,7 @@ public class FileValidator {
      * @param filename file to check
      * @return true if file matches any accept pattern (should be included in the scan), false otherwise
      */
-    private static boolean matchesAcceptPatterns(String filename) {
+    private static boolean validateAcceptPatterns(String filename) {
         boolean isHidden = filename.startsWith(".");
         if(isHidden) return accept.contains(filename);      //file hidden -> return true if matches pattern
         else {
@@ -129,5 +133,37 @@ public class FileValidator {
 
     public static void setIgnoreFilterOn(boolean ignoreFilterOn) {
         FileValidator.ignoreFilterOn = ignoreFilterOn;
+    }
+
+    public static void setIgnoreBiggerThan(int ignoreBiggerThan) {
+        FileValidator.ignoreBiggerThan = ignoreBiggerThan;
+    }
+
+    public static void setIgnoreSmallerThan(int ignoreSmallerThan) {
+        FileValidator.ignoreSmallerThan = ignoreSmallerThan;
+    }
+
+    public static void setBiggerThanFilterOn(boolean biggerThanFilterOn) {
+        FileValidator.biggerThanFilterOn = biggerThanFilterOn;
+    }
+
+    public static void setSmallerThanFilterOn(boolean smallerThanFilterOn) {
+        FileValidator.smallerThanFilterOn = smallerThanFilterOn;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    static boolean validateSize(File file) {
+        if(!smallerThanFilterOn && !biggerThanFilterOn)     //filters off accept all
+            return true;
+
+        long size = file.length();
+
+        if(smallerThanFilterOn && size/1000 < ignoreSmallerThan)
+            return false;                                           //file smaller than filter value - return false
+
+        if(biggerThanFilterOn && size/1000000 > ignoreBiggerThan)
+            return false;                                           //file bigger than filter value
+
+        return true;
     }
 }

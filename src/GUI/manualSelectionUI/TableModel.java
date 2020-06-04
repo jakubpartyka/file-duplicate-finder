@@ -75,10 +75,23 @@ public class TableModel extends AbstractTableModel {
         else return Integer.class;
     }
 
-    long getTotalSize() {
-        AtomicLong result = new AtomicLong();
-        allFiles.forEach(fileObject -> result.addAndGet(fileObject.size));
-        return result.get();
+    long getSizeOfDuplicates() {
+        long result = 0;
+
+        for (Integer group : groupCounts.keySet()) {
+            int count = groupCounts.get(group);
+            if(count > 1) result += (count - 1) * getFileSizeByGroup(group);
+        }
+
+        return result;
+    }
+
+    private long getFileSizeByGroup(int group){
+        for (FileObject file : allFiles) {
+            if(file.group == group)
+                return file.size;
+        }
+        return 0;
     }
 
     int getFilesCount() {
@@ -154,13 +167,20 @@ public class TableModel extends AbstractTableModel {
 
     }
 
-    void skip(int[] selectedRows) {
+    void skip(int[] selectedRows) {     //fixme somethings wrong
+        List<FileObject> toSkip = new ArrayList<>();
         for (int selectedRow : selectedRows) {
-            FileObject fileObject = allFiles.get(selectedRow);
-            int group = fileObject.group;
-            groupCounts.put(group, groupCounts.get(group) - 1);
-            allFiles.remove(fileObject);
+            try {
+                FileObject fileObject = allFiles.get(selectedRow);
+                int group = fileObject.group;
+                groupCounts.put(group, groupCounts.get(group) - 1);
+                toSkip.add(fileObject);
+            }
+            catch (ArrayIndexOutOfBoundsException e){
+                e.printStackTrace();
+            }
         }
+        allFiles.removeAll(toSkip);
         fireTableDataChanged();
     }
 

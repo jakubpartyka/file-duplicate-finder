@@ -1,9 +1,16 @@
 package gui;
 
+import org.apache.commons.io.FileUtils;
+
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+/**
+ * Moves duplicates to specified output directory leaving only one copy of duplicated file.
+ * Non-duplicated files will remain in source directory.
+ */
 public class MergeUI extends SwingWorker {
     private JPanel mergePanel;
     private JProgressBar progressBar1;
@@ -26,9 +33,14 @@ public class MergeUI extends SwingWorker {
         for (List<File> fileList : duplicates) {
             //copy
             File source = fileList.get(0);
-            if( source.renameTo(new File(outputDirectory.getAbsolutePath() + "/" + source.getName())))
-                System.out.println(source.getName() + " OK");
-            setProgress(counter*100/total);
+            File dest   = new File(outputDirectory + "/" + source.getName());
+            try {
+                FileUtils.copyFile(source,dest);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            firePropertyChange("prg",null,counter*100/total);
 
             //remove duplicates
             for (File duplicate : fileList) {

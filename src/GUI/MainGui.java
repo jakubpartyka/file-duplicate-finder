@@ -111,13 +111,12 @@ public class MainGui implements Runnable {
 
         scanButton.addActionListener(e -> {
             startScan();
-
         });
 
         //FOREIGN COMPONENTS
         cancelButton.addActionListener(e -> {
             fileScanner.setActive(false);
-            if(status.getText().equals("Status: cancelled")) scanEnd();
+            if(status.getText().equals("Status: cancelled")) endScan();
         });
 
         settingsButton.addActionListener(e -> switchView(2));
@@ -138,7 +137,7 @@ public class MainGui implements Runnable {
                     case "status"           : status.setText("Status: " + evt.getNewValue().toString()); break;
                     case "duplicatesFound"  : duplicatesFound.setText("Duplicates found: " + evt.getNewValue().toString()); break;
                     case "nowChecking"      : nowChecking.setText("Now checking: " + evt.getNewValue().toString()); break;
-                    case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString() + " MB"); break;
+                    case "totalSize"        : totalSize.setText("Duplicates total size: " + evt.getNewValue().toString()); break;
                     case "done"             :
                         //starts optimizer when scanning is finished
                         try {
@@ -148,17 +147,22 @@ public class MainGui implements Runnable {
                         } catch (InterruptedException | ExecutionException e1) {
                             JOptionPane.showMessageDialog(null,"Failed to optimize files due to error\n" +
                                     e1.getMessage(),"Optimizer failed",JOptionPane.WARNING_MESSAGE);
-                            scanEnd();
+                            endScan();
                         }
                         break;
                     default: break;
                 }
             });
-            scanStart();
         }
         catch (InvalidDirectoryException exception){
             JOptionPane.showMessageDialog(null,exception.getMessage(),"Failed to start scan",JOptionPane.WARNING_MESSAGE);
         }
+
+        //prepare UI components
+        scanInProgress = true;
+        cancelButton.setEnabled(true);
+        scanButton.setEnabled(false);
+        applyButton.setEnabled(false);
     }
 
     private void startOptimizer(List<List<File>> duplicates) {
@@ -180,7 +184,7 @@ public class MainGui implements Runnable {
                             linkCreatorProgressBar.setValue((Integer)evt.getNewValue());
                             break;
                         case "end"      :
-                            scanEnd();
+                            endScan();
                             break;
                         default : break;
                     }
@@ -198,7 +202,7 @@ public class MainGui implements Runnable {
                             mergeProgress.setValue((Integer)evt.getNewValue());
                             break;
                         case "end" :
-                            scanEnd();
+                            endScan();
                             break;
                     }
                 });
@@ -236,7 +240,7 @@ public class MainGui implements Runnable {
         backToMainButton = manualSelectorUI.getGoBackToMainButton();
 
         backToMainButton.addActionListener(e -> {
-            scanEnd();
+            endScan();
         });
 
         //MERGE
@@ -272,21 +276,10 @@ public class MainGui implements Runnable {
     }
 
     /**
-     * set components' state when file scan starts. Opposite of scanEnd();
-     */
-    private void scanStart(){
-        scanInProgress = true;
-        cancelButton.setEnabled(true);
-        scanButton.setEnabled(false);
-
-        applyButton.setEnabled(false);
-    }
-
-    /**
      * Enables starting new scan and updating settings after it was disabled on scan start.
      * Should be executed when scan is completed or cancelled.
      */
-    private void scanEnd(){
+    private void endScan(){
         switchView(1);
         //set output
         duplicateOutput.setText(fileScanner.getOutput());

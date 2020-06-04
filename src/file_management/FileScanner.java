@@ -2,6 +2,8 @@ package file_management;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -113,10 +115,15 @@ public class FileScanner extends SwingWorker {
      * returns disk space size used by duplicated files
      * @return total size of duplicated files in MB
      */
-    private double getDuplicatesSize() {
-        AtomicLong bytes = new AtomicLong();
-        duplicates.forEach(files -> files.forEach(file -> bytes.addAndGet(file.length())));
-        return (double)(bytes.get()*100/(1000*1000))/100;
+    private String getDuplicatesSize() {
+        AtomicLong size = new AtomicLong();
+        duplicates.forEach(files -> files.forEach(file -> size.addAndGet(file.length())));
+        double totalkB = round((double) size.get()/1000);
+        double totalMB = (totalkB/1000);
+        double totalGB = (totalMB/1000);
+        if(totalkB < 1000 ) return round(totalkB) + " kB";
+        if(totalMB < 1000) return round(totalMB) + " MB";      //fixme
+        else return round(totalGB) + " GB";
     }
 
     /**
@@ -162,7 +169,7 @@ public class FileScanner extends SwingWorker {
         for (File file : currentDir.listFiles()){
             if(file.isDirectory() && recursive)
                 directoriesToScan.add(file);
-            else if(file.isFile() && FileValidator.validate(file))
+            else if(file.isFile() && FileValidator.validateExtension(file) && FileValidator.validateSize(file))
                 allFiles.add(file);
         }
     }
@@ -175,6 +182,12 @@ public class FileScanner extends SwingWorker {
         this.active = active;
         status = "cancelled";
         firePropertyChange("status",null, status);
+    }
+
+    private static double round(double value) {
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     public String getOutput() {

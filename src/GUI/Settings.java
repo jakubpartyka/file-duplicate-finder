@@ -71,6 +71,13 @@ public class Settings {
             FileValidator.setAcceptFilterOn(acceptFilesThatMatchCheckBox.isSelected());
             FileValidator.setIgnoreFilterOn(ignoreFilesThatMatchCheckBox.isSelected());
 
+            //set ignore smaller/bigger than filters
+            FileValidator.setIgnoreBiggerThan(Integer.parseInt(biggerTextField.getText()));
+            FileValidator.setIgnoreSmallerThan(Integer.parseInt(smallerTextField.getText()));
+            FileValidator.setSmallerThanFilterOn(ignoreFilesSmallerThanCheckBox.isSelected());
+            FileValidator.setBiggerThanFilterOn(ignoreFilesBiggerThanCheckbox.isSelected());
+
+
             //set chosen duplicate-handling method
             MainGui.selectedOptimizer = getSelectedOptimizer();
         });
@@ -88,7 +95,7 @@ public class Settings {
         });
     }
 
-    public String getMergeOutputDirectory() {
+    String getMergeOutputDirectory() {
         return mergeOutputDirTextBox.getText();
     }
 

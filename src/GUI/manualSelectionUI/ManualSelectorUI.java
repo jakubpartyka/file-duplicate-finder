@@ -30,7 +30,7 @@ public class ManualSelectorUI {
     private void updateStats() {
         left.setText("Duplicates left: " + model.getFilesCount());
         groupsLeft.setText("Duplicate groups left: " + model.getGroupsCount());
-        sizeTaken.setText("Size taken by duplicates: " + model.sizeAsString(model.getTotalSize()));
+        sizeTaken.setText("Size taken by duplicates: " + model.sizeAsString(model.getSizeOfDuplicates()));
     }
 
     private void initActionListeners() {
