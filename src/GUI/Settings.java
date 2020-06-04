@@ -1,5 +1,6 @@
 package gui;
 
+import file_management.FileScanner;
 import file_management.FileValidator;
 
 import javax.swing.*;
@@ -26,6 +27,7 @@ public class Settings {
     private JRadioButton mergeNewFolderRB;
     private JTextField mergeOutputDirTextBox;
     private JButton browseButton1;
+    private JCheckBox compareDirectoriesModeCheckBox;
 
     private ButtonGroup group = new ButtonGroup();
     private File mergeDir;
@@ -77,6 +79,7 @@ public class Settings {
             FileValidator.setIgnoreSmallerThan(Integer.parseInt(smallerTextField.getText()));
             FileValidator.setSmallerThanFilterOn(ignoreFilesSmallerThanCheckBox.isSelected());
             FileValidator.setBiggerThanFilterOn(ignoreFilesBiggerThanCheckbox.isSelected());
+            FileScanner.setCompareMode(compareDirectoriesModeCheckBox.isSelected());
 
 
             //set chosen duplicate-handling method

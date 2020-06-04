@@ -6,26 +6,23 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class FileValidator {
+    //FIELDS PASSED FROM SETTINGS VIEW
     /**
      * Set of patters that a file has to match to be included in a scan
      */
     private static HashSet<String> accept = new HashSet<>();
-
     /**
      * Set of patterns that a file can not match to be included in a scan. "." matches any hidden file
      */
     private static HashSet<String> ignore = new HashSet<>();
-
     /**
      * decides if accept filter should be applied
      */
     private static boolean acceptFilterOn = false;
-
     /**
      * decides if ignore filter should be applied
      */
     private static boolean ignoreFilterOn = false;
-
     private static int ignoreSmallerThan = 1000;
     private static int ignoreBiggerThan = 500;
     private static boolean smallerThanFilterOn = true;

@@ -17,8 +17,18 @@ public class FileScanner extends SwingWorker {
     private boolean active = true;
     private String status = "not started";
 
-    //all matching files
+    //VALUES PASSED FROM SETTINGS VIEW
+    private static boolean compareMode = false;
+
+    /**
+     * all files that passed filtering (compare mode disabled)
+     */
     private List<File> allFiles = new ArrayList<>();
+
+    /**
+     * all files that passed filtering (divided in lists by directories for compare mode)
+     */
+    private List<List<File>> filesCompareMode = new ArrayList<>();
 
     //duplicate list
     private List<List<File>> duplicates = new ArrayList<>();
@@ -40,35 +50,94 @@ public class FileScanner extends SwingWorker {
 
     @Override
     protected Object doInBackground() {
-        //find all files to compare
-        firePropertyChange("status",null,"Preparing files ...");
-        while (!directoriesToScan.isEmpty() && active)
-            getFilesFromDirectory();
+        firePropertyChange("status", null, "Preparing files ...");
 
-        //search for duplicates
-        findDuplicates();
+        //find files to compare in compare mode
+        if(compareMode){
+            //find files to compare in compare mode
+            getFilesFromDirectoryCompareMode();
 
-        //prepare output
-        if(duplicates.isEmpty())
-            appendToOutput("no duplicates");
+            //search for duplicates (compare mode)
+            findDuplicatesCompareMode();
+
+        }
         else {
-            for (List<File> duplicateList : duplicates) {
-                appendToOutput("following files are duplicates:");
-                for (File file : duplicateList) {
-                    appendToOutput(file.getAbsolutePath());
-                }
-                appendToOutput("\n");
-            }
+            //find all files to compare
+            while (!directoriesToScan.isEmpty() && active)
+                getFilesFromDirectory();
+
+            //search for duplicates
+            findDuplicates();
         }
 
+        //prepare output
+        if (duplicates.isEmpty())
+            appendToOutput("no duplicates");
+        else
+            for (List<File> duplicateList : duplicates) {
+                appendToOutput("following files are duplicates:");
+                for (File file : duplicateList) appendToOutput(file.getAbsolutePath());
+                appendToOutput("\n");
+            }
         System.out.println(output);
 
         //set status on exit
-        if(!status.equals("cancelled"))
-        firePropertyChange("status",null,"completed successfully");
-        firePropertyChange("done",null,"done");
+        if (!status.equals("cancelled"))
+            firePropertyChange("status", null, "completed successfully");
+        firePropertyChange("done", null, "done");
+
         return duplicates;
     }
+
+    /**
+     * Finds duplicated files in Compare Mode (duplicates appearing in same tree are not marked as duplicates)
+     * compares every file from a directory to every other file from other directories but not against files
+     * from the same parent directory.
+     */
+    private void findDuplicatesCompareMode() {
+        if(active) firePropertyChange("status",null,"Searching for duplicates ...");
+
+        //vars for stats and progress
+        int counter = 0;
+        int total = filesCompareMode.stream().mapToInt(List::size).sum();           //calculate total number of files in all directories
+
+        for (int i = 0; i < filesCompareMode.size(); i++) {
+            for (File file : filesCompareMode.get(i)) {
+                firePropertyChange("nowChecking",null, file.getName());
+                counter++;
+
+                for (int j = i+1; j < filesCompareMode.size(); j++) {
+                    List<File> duplicates = new ArrayList<>();
+                    List<File> toRemove = new ArrayList<>();
+                    for (File file2 : filesCompareMode.get(j)) {
+                        if(!active) return;
+                        try {
+                            if(FileUtils.contentEquals(file,file2)){
+                                duplicates.add(file);
+                                duplicates.add(file2);
+                                counter++;
+                                toRemove.add(file2);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //add found duplicates and remove found files from current comparing list
+                    if(duplicates.size() > 1) {
+                        this.duplicates.add(duplicates);
+                        filesCompareMode.get(j).removeAll(toRemove);
+                    }
+                }
+
+                //update stats after every file checked
+                firePropertyChange("duplicatesFound",null, getDuplicatesCount());
+                firePropertyChange("totalSize",null, getDuplicatesSize());
+                setProgress((total-filesCompareMode.size())*100/total);
+                firePropertyChange("filesScanned",null,counter);
+            }
+        }
+    }
+
 
     /**
      * compares files to each other to find duplicates
@@ -174,6 +243,30 @@ public class FileScanner extends SwingWorker {
         }
     }
 
+    private void getFilesFromDirectoryCompareMode() {
+        //create correct number of File lists
+        for (File ignored : directoriesToScan) filesCompareMode.add(new ArrayList<>());
+
+        List<File> innerDirectories = new ArrayList<>();
+        int directoryCounter = 0;
+        for (File directory : directoriesToScan) {
+            //clear inner directories and add current parent dir to the queue
+            innerDirectories.clear();
+            innerDirectories.add(directory);
+
+            while (!innerDirectories.isEmpty()){
+                File currentDir = innerDirectories.remove(0);
+                for (File file : currentDir.listFiles()){
+                    if(file.isDirectory() && recursive)
+                        innerDirectories.add(file);
+                    else if(file.isFile() && FileValidator.validateExtension(file) && FileValidator.validateSize(file))
+                        filesCompareMode.get(directoryCounter).add(file);
+                }
+            }
+            directoryCounter++;
+        }
+    }
+
     private void appendToOutput(String message){
         output += message + "\n";
     }
@@ -192,5 +285,9 @@ public class FileScanner extends SwingWorker {
 
     public String getOutput() {
         return output;
+    }
+
+    public static void setCompareMode(boolean compareMode) {
+        FileScanner.compareMode = compareMode;
     }
 }
