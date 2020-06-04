@@ -105,7 +105,6 @@ public class FileScanner extends SwingWorker {
             for (File file : filesCompareMode.get(i)) {
                 firePropertyChange("nowChecking",null, file.getName());
                 counter++;
-
                 for (int j = i+1; j < filesCompareMode.size(); j++) {
                     List<File> duplicates = new ArrayList<>();
                     List<File> toRemove = new ArrayList<>();
@@ -113,9 +112,9 @@ public class FileScanner extends SwingWorker {
                         if(!active) return;
                         try {
                             if(FileUtils.contentEquals(file,file2)){
+                                counter++;
                                 duplicates.add(file);
                                 duplicates.add(file2);
-                                counter++;
                                 toRemove.add(file2);
                             }
                         } catch (IOException e) {
@@ -132,7 +131,7 @@ public class FileScanner extends SwingWorker {
                 //update stats after every file checked
                 firePropertyChange("duplicatesFound",null, getDuplicatesCount());
                 firePropertyChange("totalSize",null, getDuplicatesSize());
-                setProgress((total-filesCompareMode.size())*100/total);
+                setProgress((counter*100/total));
                 firePropertyChange("filesScanned",null,counter);
             }
         }
