@@ -54,6 +54,13 @@ public class FileScanner extends SwingWorker {
 
         //find files to compare in compare mode
         if(compareMode){
+            if(directoriesToScan.size() != 2){
+                JOptionPane.showMessageDialog(null,"You have chosen Directory Compare Mode. Exactly 2 directories have to be chosen to use it." +
+                        "\nNumber of currently chosen directories: " + directoriesToScan.size(),"Wrong parameters",JOptionPane.WARNING_MESSAGE);
+                firePropertyChange("end",null,null);
+                return "wrong input parameters";
+            }
+
             //find files to compare in compare mode
             getFilesFromDirectoryCompareMode();
 
@@ -136,7 +143,6 @@ public class FileScanner extends SwingWorker {
             }
         }
     }
-
 
     /**
      * compares files to each other to find duplicates
