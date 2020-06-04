@@ -4,6 +4,8 @@ import file_management.FileValidator;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Settings {
     private JPanel settingsPanel;
@@ -57,6 +59,7 @@ public class Settings {
         ignoreFilesSmallerThanCheckBox.addActionListener(e -> smallerTextField.setEnabled(ignoreFilesSmallerThanCheckBox.isSelected()));
         ignoreFilesBiggerThanCheckbox.addActionListener(e -> biggerTextField.setEnabled(ignoreFilesBiggerThanCheckbox.isSelected()));
         saveReportToFileCheckBox.addActionListener(e -> logOutputTextField.setEnabled(saveReportToFileCheckBox.isSelected()));
+
 
         mergeNewFolderRB.addActionListener(e -> {
            mergeOutputDirTextBox.setEnabled(mergeNewFolderRB.isEnabled());

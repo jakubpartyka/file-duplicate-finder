@@ -86,7 +86,7 @@ public class MainGui implements Runnable {
      */
     private void initFrame() {
         frame = new JFrame("Duplicate Finder");
-        frame.setSize(600,600);
+        frame.setSize(800,600);
         frame.setResizable(true);
         frame.setMinimumSize(new Dimension(300,100));
         frame.setLocationRelativeTo(null);
