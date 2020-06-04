@@ -1,9 +1,11 @@
 package gui.manualSelectionUI;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class ManualSelectorUI {
@@ -28,7 +30,7 @@ public class ManualSelectorUI {
     }
 
     private void updateStats() {
-        left.setText("Duplicates left: " + model.getFilesCount());
+        left.setText("Duplicates left: " + model.getDuplicatesCount());
         groupsLeft.setText("Duplicate groups left: " + model.getGroupsCount());
         sizeTaken.setText("Size taken by duplicates: " + model.sizeAsString(model.getSizeOfDuplicates()));
     }
@@ -59,6 +61,15 @@ public class ManualSelectorUI {
         table.setModel(model);
 
         table.setAutoCreateRowSorter(false);
+
+        table.setDefaultRenderer(Object.class,new DefaultTableCellRenderer(){
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBackground(model.getColorByRow(row));
+                return this;
+            }
+        });
 
         //set columns
         table.getTableHeader().setReorderingAllowed(false);

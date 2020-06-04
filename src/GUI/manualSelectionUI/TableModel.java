@@ -3,12 +3,14 @@ package gui.manualSelectionUI;
 import file_management.FileObject;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 //todo sort after all updates (by group count descending)
@@ -25,6 +27,11 @@ public class TableModel extends AbstractTableModel {
 
     private HashMap<Integer,Integer> groupCounts = new HashMap<>();
 
+    /**
+     * HashMap that holds colors for duplicate groups. Key (Integer) represents group number, and value (Color) assigned color.
+     */
+    private HashMap<Integer,Color> colors = new HashMap<>();
+
     TableModel(List<List<File>> duplicates) {
         int counter = 0;
         for (List<File> fileList : duplicates) {
@@ -33,6 +40,10 @@ public class TableModel extends AbstractTableModel {
 
             groupCounts.put(counter,fileList.size());
             fileList.forEach(file -> allFiles.add(new FileObject(file, finalCounter)));
+        }
+        for (Integer group : groupCounts.keySet()) {
+            Random random = new Random();
+            colors.put(group,new Color(random.nextInt(255),random.nextInt(255),random.nextInt(255),50));
         }
     }
 
@@ -70,9 +81,7 @@ public class TableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        if(columnIndex == 3)
-            return String.class;
-        else return Integer.class;
+        return String.class;
     }
 
     long getSizeOfDuplicates() {
@@ -98,11 +107,21 @@ public class TableModel extends AbstractTableModel {
         return allFiles.size();
     }
 
+    int getDuplicatesCount(){
+        int count = 0;
+        for (Integer key : groupCounts.keySet()) {
+            count += groupCounts.get(key) - 1;
+        }
+        return count;
+    }
+
     int getGroupsCount() {
+        List<Integer> keysToRemove = new ArrayList<>();
         for (Integer key : groupCounts.keySet()) {
             if(groupCounts.get(key) < 1)
-                groupCounts.remove(key);
+                keysToRemove.add(key);
         }
+        groupCounts.keySet().removeAll(keysToRemove);
         return groupCounts.size();
     }
 
@@ -192,5 +211,10 @@ public class TableModel extends AbstractTableModel {
 
     String getFilePath(int selectedRow) {
         return allFiles.get(selectedRow).source.getAbsolutePath();
+    }
+
+    Color getColorByRow(int rowIndex){
+        int group = allFiles.get(rowIndex).group;
+        return colors.get(group);
     }
 }
