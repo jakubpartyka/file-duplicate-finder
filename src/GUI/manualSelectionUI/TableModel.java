@@ -23,6 +23,9 @@ public class TableModel extends AbstractTableModel {
             "location",
     };
 
+    /**
+     * a list where file objects from the table are kept
+     */
     private List<FileObject> allFiles = new ArrayList<>();
 
     private HashMap<Integer,Integer> groupCounts = new HashMap<>();
@@ -216,5 +219,18 @@ public class TableModel extends AbstractTableModel {
     Color getColorByRow(int rowIndex){
         int group = allFiles.get(rowIndex).group;
         return colors.get(group);
+    }
+
+    /**
+     * It removes files that were already deleted from the table
+     */
+    void refresh() {
+        List<FileObject> toRemove = new ArrayList<>();
+        for (FileObject file : allFiles) {
+            if(!file.source.exists())
+                toRemove.add(file);
+        }
+        allFiles.removeAll(toRemove);
+        fireTableDataChanged();
     }
 }

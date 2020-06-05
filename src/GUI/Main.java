@@ -13,4 +13,4 @@ public class Main {
 }
 
 
-//todo delete if parent the same (checkbox)
+//todo cleanup (hide deleted files)

@@ -20,6 +20,7 @@ public class ManualSelectorUI {
     private JLabel sizeTaken;
     private JButton skipButton;
     private JButton goBackToMainButton;
+    private JButton refreshButton;
 
     private TableModel model;
 
@@ -52,6 +53,11 @@ public class ManualSelectorUI {
         skipButton.addActionListener(e -> {
                 model.skip(table.getSelectedRows());
                 updateStats();
+        });
+
+        refreshButton.addActionListener(e -> {
+            model.refresh();
+            updateStats();
         });
     }
 
